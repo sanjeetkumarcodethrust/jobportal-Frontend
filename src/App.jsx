@@ -6,6 +6,7 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
+import Jobs from './pages/Jobs';
 
 function App() {
   return (
@@ -17,7 +18,8 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/dashboard" element={<Dashboard />} />
-          {/* Add more routes like /post-job, /jobs, etc. here */}
+          <Route path="/jobs" element={<Jobs />} />
+          {/* Add more routes like /post-job, etc. here */}
         </Routes>
       </main>
       <Footer />
