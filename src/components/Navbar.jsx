@@ -87,7 +87,7 @@ const Navbar = () => {
               <Briefcase className="w-5 h-5 text-white" />
             </div>
             <span className="text-xl font-extrabold tracking-tight">
-              <span className="text-indigo-600 dark:text-indigo-400">naukri</span>
+              <span className="text-indigo-600 dark:text-indigo-400">jobsearch</span>
             </span>
           </Link>
 

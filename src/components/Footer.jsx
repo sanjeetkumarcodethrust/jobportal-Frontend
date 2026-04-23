@@ -43,7 +43,7 @@ const Footer = () => {
                 <Briefcase className="w-4 h-4 text-white" />
               </div>
               <span className="text-lg font-extrabold text-indigo-600 dark:text-indigo-400">
-                naukri
+                jobsearch
               </span>
             </Link>
             <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed mb-6 max-w-xs">
@@ -88,7 +88,7 @@ const Footer = () => {
         {/* Bottom Bar */}
         <div className="mt-12 pt-8 border-t border-gray-200 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-sm text-gray-400 dark:text-gray-500">
-            © {new Date().getFullYear()} Naukri. All rights reserved.
+            © {new Date().getFullYear()} JobSearch. All rights reserved.
           </p>
           <p className="text-sm text-gray-400 dark:text-gray-500 flex items-center gap-1">
             Made with <Heart className="w-3.5 h-3.5 text-red-500 fill-current" /> in India
