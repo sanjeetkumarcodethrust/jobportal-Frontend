@@ -11,10 +11,12 @@ import {
   Building2,
   Users,
   Headphones,
+  Home,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const NAV_LINKS = [
+  { label: 'Home', to: '/', icon: Home },
   { label: 'Jobs', to: '/jobs', icon: Briefcase },
   { label: 'Companies', to: '/companies', icon: Building2 },
   { label: 'Services', to: '/services', icon: Headphones },
