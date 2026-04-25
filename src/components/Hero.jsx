@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Search, MapPin, ChevronDown, Sparkles, TrendingUp, Star } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -27,10 +28,15 @@ const Hero = () => {
   const [location, setLocation] = useState('');
   const [isExpDropdownOpen, setIsExpDropdownOpen] = useState(false);
 
+  const navigate = useNavigate();
+
   const handleSearch = (e) => {
     e.preventDefault();
-    // Search handler – would integrate with router/API
-    console.log({ skills, experience, location });
+    const params = new URLSearchParams();
+    if (skills) params.append('skills', skills);
+    if (experience) params.append('experience', experience);
+    if (location) params.append('location', location);
+    navigate(`/jobs?${params.toString()}`);
   };
 
   return (

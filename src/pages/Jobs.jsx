@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import api from '../services/api';
 import { motion } from 'framer-motion';
 import { Briefcase, Building, MapPin, DollarSign, Clock } from 'lucide-react';
@@ -8,10 +9,12 @@ const Jobs = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const location = useLocation();
+
   useEffect(() => {
     const fetchJobs = async () => {
       try {
-        const res = await api.get('/jobs');
+        const res = await api.get(`/jobs${location.search}`);
         setJobs(res.data?.data || res.data || []);
         setLoading(false);
       } catch (err) {
@@ -22,7 +25,7 @@ const Jobs = () => {
     };
 
     fetchJobs();
-  }, []);
+  }, [location.search]);
 
   return (
     <div className="bg-[var(--color-bg)] min-h-screen py-12">
