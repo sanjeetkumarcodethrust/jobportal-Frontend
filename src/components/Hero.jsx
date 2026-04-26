@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, MapPin, ChevronDown, Sparkles, TrendingUp, Star } from 'lucide-react';
+import { Search, MapPin, ChevronDown, Sparkles, TrendingUp, Star, Building2, Users, Briefcase } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const EXPERIENCE_OPTIONS = [
@@ -26,7 +26,7 @@ const Hero = () => {
   const [skills, setSkills] = useState('');
   const [experience, setExperience] = useState('');
   const [location, setLocation] = useState('');
-  const [isExpDropdownOpen, setIsExpDropdownOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState('Find Jobs');
 
   const navigate = useNavigate();
 
@@ -39,193 +39,157 @@ const Hero = () => {
     navigate(`/jobs?${params.toString()}`);
   };
 
+  const stats = [
+    { label: '5 Lakh+', sub: 'Jobs Available', icon: Search, color: 'from-blue-500/20 to-blue-600/20', iconColor: 'text-blue-400', pos: 'top-[20%] left-[10%]' },
+    { label: '10K+', sub: 'Top Companies', icon: Building2, color: 'from-purple-500/20 to-purple-600/20', iconColor: 'text-purple-400', pos: 'top-[25%] right-[15%]' },
+    { label: '50 Lakh+', sub: 'Active Users', icon: Users, color: 'from-pink-500/20 to-pink-600/20', iconColor: 'text-pink-400', pos: 'bottom-[20%] right-[10%]' },
+  ];
+
   return (
-    <section
-      id="hero-section"
-      className="relative overflow-hidden"
-      style={{
-        background: 'linear-gradient(135deg, var(--hero-gradient-start) 0%, var(--hero-gradient-mid) 50%, var(--hero-gradient-end) 100%)',
-      }}
-    >
-      {/* ── Decorative Background Elements ─── */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-[600px] h-[600px] rounded-full bg-indigo-400/10 dark:bg-indigo-500/5 blur-3xl" />
-        <div className="absolute -bottom-40 -left-40 w-[500px] h-[500px] rounded-full bg-blue-400/10 dark:bg-blue-500/5 blur-3xl" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full bg-purple-300/5 dark:bg-purple-500/3 blur-3xl" />
-        
-        {/* Floating dots */}
-        {[...Array(6)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute w-2 h-2 rounded-full bg-indigo-400/20 dark:bg-indigo-400/10"
-            style={{
-              top: `${15 + i * 14}%`,
-              left: `${10 + i * 15}%`,
-            }}
-            animate={{
-              y: [0, -20, 0],
-              opacity: [0.3, 0.7, 0.3],
-            }}
-            transition={{
-              duration: 3 + i * 0.5,
-              repeat: Infinity,
-              ease: 'easeInOut',
-              delay: i * 0.3,
-            }}
-          />
-        ))}
+    <section className="relative min-h-screen pt-32 pb-20 overflow-hidden bg-[#030712]">
+      {/* ── Background Gradients ─── */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-violet-600/10 blur-[120px]" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-purple-600/10 blur-[120px]" />
       </div>
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28 lg:py-36">
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         {/* ── Badge ─── */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="flex justify-center mb-6"
+          className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-medium text-gray-300 mb-8"
         >
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-100 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 text-sm font-medium border border-indigo-200/60 dark:border-indigo-800/60">
-            <Sparkles className="w-4 h-4" />
-            <span>#1 Job Platform in India</span>
-            <Star className="w-3.5 h-3.5 fill-current" />
-          </div>
+          <Sparkles className="w-3 h-3 text-purple-400" />
+          <span>#1 Job Platform in India</span>
+          <Star className="w-3 h-3 text-purple-400 fill-purple-400" />
         </motion.div>
 
         {/* ── Heading ─── */}
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.1 }}
-          className="text-center"
+          transition={{ delay: 0.1 }}
         >
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-extrabold tracking-tight text-gray-900 dark:text-white leading-tight">
-            Find your{' '}
-            <span className="relative inline-block">
-              <span className="bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
-                dream job
-              </span>
-              <motion.div
-                className="absolute -bottom-1 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-500 rounded-full"
-                initial={{ scaleX: 0 }}
-                animate={{ scaleX: 1 }}
-                transition={{ duration: 0.8, delay: 0.6, ease: 'easeOut' }}
-                style={{ transformOrigin: 'left' }}
-              />
-            </span>{' '}
-            now
+          <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-white mb-6">
+            Find your <br />
+            <span className="bg-gradient-to-r from-blue-400 via-violet-400 to-purple-500 bg-clip-text text-transparent">
+              dream job
+            </span>
           </h1>
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-            className="mt-4 sm:mt-6 text-lg sm:text-xl text-gray-500 dark:text-gray-400 max-w-2xl mx-auto font-medium"
-          >
-            <span className="text-indigo-600 dark:text-indigo-400 font-bold">5 lakh+</span> jobs for you to explore across top companies
-          </motion.p>
+          <p className="text-lg text-gray-400 max-w-2xl mx-auto mb-12">
+            Discover opportunities, build your career, and <br /> work with the best companies
+          </p>
         </motion.div>
 
-        {/* ── Search Bar ─── */}
-        <motion.form
-          onSubmit={handleSearch}
+        {/* ── Floating Stats ─── */}
+        {stats.map((stat, i) => (
+          <motion.div
+            key={i}
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.3 + i * 0.1 }}
+            className={`absolute hidden xl:flex flex-col items-center gap-2 ${stat.pos}`}
+          >
+            <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${stat.color} backdrop-blur-md border border-white/10 flex items-center justify-center shadow-lg shadow-black/20`}>
+              <stat.icon className={`w-6 h-6 ${stat.iconColor}`} />
+            </div>
+            <div className="text-center">
+              <div className="text-white font-bold">{stat.label}</div>
+              <div className="text-xs text-gray-500">{stat.sub}</div>
+            </div>
+          </motion.div>
+        ))}
+
+        {/* ── Search Container ─── */}
+        <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.3 }}
-          className="mt-10 sm:mt-12 max-w-4xl mx-auto"
-          id="job-search-form"
+          transition={{ delay: 0.2 }}
+          className="max-w-4xl mx-auto bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-[32px] p-6 shadow-2xl"
         >
-          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl dark:shadow-2xl ring-1 ring-gray-200/50 dark:ring-slate-700/50 p-2 sm:p-2.5">
-            <div className="flex flex-col sm:flex-row gap-2 sm:gap-0">
-              {/* Skills Input */}
-              <div className="flex-1 flex items-center gap-3 px-4 py-3 sm:border-r border-gray-200 dark:border-slate-700">
-                <Search className="w-5 h-5 text-gray-400 dark:text-gray-500 shrink-0" />
-                <input
-                  type="text"
-                  id="search-skills"
-                  value={skills}
-                  onChange={(e) => setSkills(e.target.value)}
-                  placeholder="Enter skills / designations / companies"
-                  className="w-full bg-transparent text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 outline-none"
-                />
-              </div>
-
-              {/* Experience Dropdown */}
-              <div className="relative flex items-center px-4 py-3 sm:border-r border-gray-200 dark:border-slate-700 sm:w-48">
-                <button
-                  type="button"
-                  id="search-experience"
-                  onClick={() => setIsExpDropdownOpen(!isExpDropdownOpen)}
-                  className="flex items-center justify-between w-full gap-2 text-sm text-gray-700 dark:text-gray-200 outline-none cursor-pointer"
-                >
-                  <span className={experience ? 'text-gray-900 dark:text-gray-100' : 'text-gray-400 dark:text-gray-500'}>
-                    {experience || 'Select experience'}
-                  </span>
-                  <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${isExpDropdownOpen ? 'rotate-180' : ''}`} />
-                </button>
-
-                {isExpDropdownOpen && (
-                  <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-slate-800 rounded-xl shadow-xl ring-1 ring-gray-200 dark:ring-slate-700 py-2 z-20 max-h-48 overflow-auto">
-                    {EXPERIENCE_OPTIONS.map((opt) => (
-                      <button
-                        key={opt}
-                        type="button"
-                        onClick={() => { setExperience(opt); setIsExpDropdownOpen(false); }}
-                        className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${
-                          experience === opt
-                            ? 'bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 font-medium'
-                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700'
-                        }`}
-                      >
-                        {opt}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Location Input */}
-              <div className="flex-1 flex items-center gap-3 px-4 py-3">
-                <MapPin className="w-5 h-5 text-gray-400 dark:text-gray-500 shrink-0" />
-                <input
-                  type="text"
-                  id="search-location"
-                  value={location}
-                  onChange={(e) => setLocation(e.target.value)}
-                  placeholder="Enter location"
-                  className="w-full bg-transparent text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 outline-none"
-                />
-              </div>
-
-              {/* Search Button */}
+          {/* Tabs */}
+          <div className="flex items-center justify-center gap-8 mb-8 border-b border-white/5 pb-4">
+            {['Find Jobs', 'Companies', 'Skills', 'Locations'].map((tab) => (
               <button
-                type="submit"
-                id="search-submit"
-                className="bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white font-semibold text-sm px-8 py-3 rounded-xl shadow-md hover:shadow-lg hover:shadow-indigo-200/50 dark:hover:shadow-indigo-900/30 transition-all duration-200 active:scale-95 cursor-pointer"
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`flex items-center gap-2 text-sm font-medium transition-colors relative pb-4 ${
+                  activeTab === tab ? 'text-white' : 'text-gray-500 hover:text-gray-300'
+                }`}
               >
-                Search
+                {tab === 'Find Jobs' && <Search className="w-4 h-4" />}
+                {tab === 'Companies' && <Building2 className="w-4 h-4" />}
+                {tab === 'Skills' && <Sparkles className="w-4 h-4" />}
+                {tab === 'Locations' && <MapPin className="w-4 h-4" />}
+                {tab}
+                {activeTab === tab && (
+                  <motion.div
+                    layoutId="activeTab"
+                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-purple-500"
+                  />
+                )}
               </button>
-            </div>
+            ))}
           </div>
-        </motion.form>
 
-        {/* ── Trending Searches ─── */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.6 }}
-          className="mt-6 flex flex-wrap items-center justify-center gap-2 sm:gap-3"
-        >
-          <div className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400 font-medium">
-            <TrendingUp className="w-4 h-4" />
-            <span>Trending:</span>
-          </div>
-          {TRENDING_SEARCHES.map((term) => (
+          {/* Form */}
+          <form onSubmit={handleSearch} className="flex flex-col md:flex-row gap-4 items-center">
+            <div className="flex-1 w-full flex items-center gap-3 px-5 py-4 bg-white/[0.03] border border-white/10 rounded-2xl focus-within:border-purple-500/50 transition-colors">
+              <Search className="w-5 h-5 text-gray-500" />
+              <input
+                type="text"
+                placeholder="Enter skills / designations / companies"
+                className="bg-transparent w-full outline-none text-white text-sm"
+                value={skills}
+                onChange={(e) => setSkills(e.target.value)}
+              />
+            </div>
+
+            <div className="w-full md:w-48 flex items-center gap-3 px-5 py-4 bg-white/[0.03] border border-white/10 rounded-2xl">
+              <Briefcase className="w-5 h-5 text-gray-500" />
+              <select 
+                className="bg-transparent w-full outline-none text-white text-sm appearance-none"
+                value={experience}
+                onChange={(e) => setExperience(e.target.value)}
+              >
+                <option value="" className="bg-gray-900">Select experience</option>
+                <option value="fresher" className="bg-gray-900">Fresher</option>
+                <option value="1-3" className="bg-gray-900">1-3 Years</option>
+              </select>
+            </div>
+
+            <div className="flex-1 w-full flex items-center gap-3 px-5 py-4 bg-white/[0.03] border border-white/10 rounded-2xl">
+              <MapPin className="w-5 h-5 text-gray-500" />
+              <input
+                type="text"
+                placeholder="Enter location"
+                className="bg-transparent w-full outline-none text-white text-sm"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+              />
+            </div>
+
             <button
-              key={term}
-              className="px-3 py-1.5 text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-300 bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm rounded-full border border-gray-200/60 dark:border-slate-700/60 hover:border-indigo-300 dark:hover:border-indigo-700 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all cursor-pointer"
+              type="submit"
+              className="w-full md:w-auto px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold rounded-2xl shadow-lg shadow-purple-500/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
             >
-              {term}
+              Search Jobs
             </button>
-          ))}
+          </form>
+
+          {/* Popular Searches */}
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+            <span className="text-sm text-gray-500">Popular Searches:</span>
+            {['Data Analyst', 'React Developer', 'Product Manager', 'UI/UX Designer', 'Python Developer'].map((tag) => (
+              <button
+                key={tag}
+                className="px-4 py-1.5 rounded-full bg-white/[0.03] border border-white/10 text-xs text-gray-400 hover:text-white hover:border-white/30 transition-colors"
+              >
+                {tag}
+              </button>
+            ))}
+          </div>
         </motion.div>
       </div>
     </section>
