@@ -46,11 +46,11 @@ const Hero = () => {
   ];
 
   return (
-    <section className="relative min-h-screen pt-32 pb-20 overflow-hidden bg-[#030712]">
+    <section className="relative min-h-screen pt-32 pb-20 overflow-hidden bg-[var(--color-bg)] transition-colors duration-500">
       {/* ── Background Gradients ─── */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-violet-600/10 blur-[120px]" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-purple-600/10 blur-[120px]" />
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-[-10%] left-[-10%] w-[70%] h-[70%] rounded-full bg-violet-600/10 dark:bg-violet-600/15 blur-[120px]" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[70%] h-[70%] rounded-full bg-purple-600/10 dark:bg-purple-600/15 blur-[120px]" />
       </div>
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -58,11 +58,11 @@ const Hero = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-medium text-gray-300 mb-8"
+          className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] text-xs font-medium text-[var(--color-text-secondary)] mb-8 shadow-sm"
         >
-          <Sparkles className="w-3 h-3 text-purple-400" />
+          <Sparkles className="w-3 h-3 text-purple-500" />
           <span>#1 Job Platform in India</span>
-          <Star className="w-3 h-3 text-purple-400 fill-purple-400" />
+          <Star className="w-3 h-3 text-purple-500 fill-purple-500" />
         </motion.div>
 
         {/* ── Heading ─── */}
@@ -71,14 +71,14 @@ const Hero = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
         >
-          <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-white mb-6">
+          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-[var(--color-text-primary)] mb-6">
             Find your <br />
-            <span className="bg-gradient-to-r from-blue-400 via-violet-400 to-purple-500 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-blue-500 via-violet-500 to-purple-600 bg-clip-text text-transparent">
               dream job
             </span>
           </h1>
-          <p className="text-lg text-gray-400 max-w-2xl mx-auto mb-12">
-            Discover opportunities, build your career, and <br /> work with the best companies
+          <p className="text-lg text-[var(--color-text-secondary)] max-w-2xl mx-auto mb-12 leading-relaxed">
+            Discover opportunities, build your career, and <br className="hidden md:block" /> work with the best companies
           </p>
         </motion.div>
 
@@ -91,12 +91,12 @@ const Hero = () => {
             transition={{ delay: 0.3 + i * 0.1 }}
             className={`absolute hidden xl:flex flex-col items-center gap-2 ${stat.pos}`}
           >
-            <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${stat.color} backdrop-blur-md border border-white/10 flex items-center justify-center shadow-lg shadow-black/20`}>
+            <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${stat.color} backdrop-blur-md border border-[var(--color-border)] flex items-center justify-center shadow-lg`}>
               <stat.icon className={`w-6 h-6 ${stat.iconColor}`} />
             </div>
             <div className="text-center">
-              <div className="text-white font-bold">{stat.label}</div>
-              <div className="text-xs text-gray-500">{stat.sub}</div>
+              <div className="text-[var(--color-text-primary)] font-bold">{stat.label}</div>
+              <div className="text-xs text-[var(--color-text-secondary)]">{stat.sub}</div>
             </div>
           </motion.div>
         ))}
@@ -106,16 +106,16 @@ const Hero = () => {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="max-w-4xl mx-auto bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-[32px] p-6 shadow-2xl"
+          className="max-w-4xl mx-auto bg-[var(--color-surface)] backdrop-blur-xl border border-[var(--color-border)] rounded-[32px] p-6 shadow-2xl relative z-10"
         >
           {/* Tabs */}
-          <div className="flex items-center justify-center gap-8 mb-8 border-b border-white/5 pb-4">
+          <div className="flex items-center justify-center gap-8 mb-8 border-b border-[var(--color-border)] pb-4">
             {['Find Jobs', 'Companies', 'Skills', 'Locations'].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
                 className={`flex items-center gap-2 text-sm font-medium transition-colors relative pb-4 ${
-                  activeTab === tab ? 'text-white' : 'text-gray-500 hover:text-gray-300'
+                  activeTab === tab ? 'text-[var(--color-text-primary)]' : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'
                 }`}
               >
                 {tab === 'Find Jobs' && <Search className="w-4 h-4" />}
@@ -135,36 +135,36 @@ const Hero = () => {
 
           {/* Form */}
           <form onSubmit={handleSearch} className="flex flex-col md:flex-row gap-4 items-center">
-            <div className="flex-1 w-full flex items-center gap-3 px-5 py-4 bg-white/[0.03] border border-white/10 rounded-2xl focus-within:border-purple-500/50 transition-colors">
-              <Search className="w-5 h-5 text-gray-500" />
+            <div className="flex-1 w-full flex items-center gap-3 px-5 py-4 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-2xl focus-within:border-purple-500/50 transition-colors">
+              <Search className="w-5 h-5 text-[var(--color-text-muted)]" />
               <input
                 type="text"
                 placeholder="Enter skills / designations / companies"
-                className="bg-transparent w-full outline-none text-white text-sm"
+                className="bg-transparent w-full outline-none text-[var(--color-text-primary)] text-sm"
                 value={skills}
                 onChange={(e) => setSkills(e.target.value)}
               />
             </div>
 
-            <div className="w-full md:w-48 flex items-center gap-3 px-5 py-4 bg-white/[0.03] border border-white/10 rounded-2xl">
-              <Briefcase className="w-5 h-5 text-gray-500" />
+            <div className="w-full md:w-48 flex items-center gap-3 px-5 py-4 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-2xl">
+              <Briefcase className="w-5 h-5 text-[var(--color-text-muted)]" />
               <select 
-                className="bg-transparent w-full outline-none text-white text-sm appearance-none"
+                className="bg-transparent w-full outline-none text-[var(--color-text-primary)] text-sm appearance-none cursor-pointer"
                 value={experience}
                 onChange={(e) => setExperience(e.target.value)}
               >
-                <option value="" className="bg-gray-900">Select experience</option>
-                <option value="fresher" className="bg-gray-900">Fresher</option>
-                <option value="1-3" className="bg-gray-900">1-3 Years</option>
+                <option value="" className="dark:bg-gray-900 bg-white">Select exp</option>
+                <option value="fresher" className="dark:bg-gray-900 bg-white">Fresher</option>
+                <option value="1-3" className="dark:bg-gray-900 bg-white">1-3 Years</option>
               </select>
             </div>
 
-            <div className="flex-1 w-full flex items-center gap-3 px-5 py-4 bg-white/[0.03] border border-white/10 rounded-2xl">
-              <MapPin className="w-5 h-5 text-gray-500" />
+            <div className="flex-1 w-full flex items-center gap-3 px-5 py-4 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-2xl">
+              <MapPin className="w-5 h-5 text-[var(--color-text-muted)]" />
               <input
                 type="text"
                 placeholder="Enter location"
-                className="bg-transparent w-full outline-none text-white text-sm"
+                className="bg-transparent w-full outline-none text-[var(--color-text-primary)] text-sm"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
               />
@@ -180,11 +180,11 @@ const Hero = () => {
 
           {/* Popular Searches */}
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-            <span className="text-sm text-gray-500">Popular Searches:</span>
+            <span className="text-sm text-[var(--color-text-muted)]">Popular Searches:</span>
             {['Data Analyst', 'React Developer', 'Product Manager', 'UI/UX Designer', 'Python Developer'].map((tag) => (
               <button
                 key={tag}
-                className="px-4 py-1.5 rounded-full bg-white/[0.03] border border-white/10 text-xs text-gray-400 hover:text-white hover:border-white/30 transition-colors"
+                className="px-4 py-1.5 rounded-full bg-[var(--color-bg)] border border-[var(--color-border)] text-xs text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:border-purple-500/50 transition-all cursor-pointer"
               >
                 {tag}
               </button>

@@ -34,7 +34,7 @@ const FEATURES = [
 
 const Features = () => {
   return (
-    <section className="py-24 bg-[#030712] relative overflow-hidden">
+    <section className="py-24 bg-[var(--color-bg)] relative overflow-hidden transition-colors duration-500">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {FEATURES.map((feature, i) => (
@@ -45,16 +45,16 @@ const Features = () => {
               viewport={{ once: true }}
               transition={{ delay: i * 0.1 }}
               whileHover={{ y: -5 }}
-              className="group relative p-8 rounded-3xl bg-white/[0.02] border border-white/5 hover:border-white/10 transition-all duration-300"
+              className="group relative p-8 rounded-3xl bg-[var(--color-surface)] border border-[var(--color-border)] hover:border-purple-500/30 transition-all duration-300 shadow-sm hover:shadow-xl"
             >
               <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${feature.color} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}>
                 <feature.icon className={`w-7 h-7 ${feature.iconColor}`} />
               </div>
-              <h3 className="text-xl font-bold text-white mb-2">{feature.title}</h3>
-              <p className="text-gray-500 text-sm leading-relaxed">{feature.description}</p>
+              <h3 className="text-xl font-bold text-[var(--color-text-primary)] mb-2">{feature.title}</h3>
+              <p className="text-[var(--color-text-secondary)] text-sm leading-relaxed">{feature.description}</p>
               
               {/* Subtle Glow */}
-              <div className={`absolute inset-0 bg-gradient-to-br ${feature.color} opacity-0 group-hover:opacity-10 blur-2xl transition-opacity duration-300 pointer-events-none rounded-3xl`} />
+              <div className={`absolute inset-0 bg-gradient-to-br ${feature.color} opacity-0 group-hover:opacity-5 blur-2xl transition-opacity duration-300 pointer-events-none rounded-3xl`} />
             </motion.div>
           ))}
         </div>

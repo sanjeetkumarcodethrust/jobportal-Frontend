@@ -14,11 +14,11 @@ const COMPANIES = [
 
 const TopCompanies = () => {
   return (
-    <section className="py-24 bg-[#030712]">
+    <section className="py-24 bg-[var(--color-bg)] transition-colors duration-500">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between mb-12">
-          <h2 className="text-3xl font-bold text-white">Top Companies Hiring</h2>
-          <button className="flex items-center gap-2 text-purple-400 hover:text-purple-300 transition-colors font-semibold group">
+          <h2 className="text-3xl font-bold text-[var(--color-text-primary)]">Top Companies Hiring</h2>
+          <button className="flex items-center gap-2 text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 transition-colors font-semibold group">
             View all companies
             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </button>
@@ -32,13 +32,13 @@ const TopCompanies = () => {
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.05 }}
-              whileHover={{ y: -5, backgroundColor: 'rgba(255, 255, 255, 0.05)' }}
-              className={`group flex items-center justify-center p-6 rounded-2xl bg-white/[0.02] border border-white/5 transition-all duration-300 ${company.color} hover:shadow-2xl`}
+              whileHover={{ y: -5 }}
+              className={`group flex items-center justify-center p-6 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] transition-all duration-300 ${company.color} hover:shadow-xl`}
             >
               <img
                 src={company.logo}
                 alt={company.name}
-                className="h-8 w-auto grayscale group-hover:grayscale-0 transition-all duration-300 brightness-0 invert group-hover:brightness-100 group-hover:invert-0"
+                className="h-8 w-auto grayscale group-hover:grayscale-0 transition-all duration-300 dark:brightness-0 dark:invert group-hover:dark:brightness-100 group-hover:dark:invert-0"
               />
             </motion.div>
           ))}

@@ -34,15 +34,27 @@ const Navbar = () => {
   const dropdownRef = useRef(null);
 
   useEffect(() => {
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    setIsDark(savedTheme === 'dark');
+    if (savedTheme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, []);
+
+  const toggleDark = () => {
+    const nextTheme = isDark ? 'light' : 'dark';
+    setIsDark(!isDark);
+    document.documentElement.classList.toggle('dark');
+    localStorage.setItem('theme', nextTheme);
+  };
+
+  useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 10);
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
-  const toggleDark = () => {
-    setIsDark(!isDark);
-    document.documentElement.classList.toggle('dark');
-  };
 
   const handleLogout = () => {
     logout();
@@ -54,7 +66,7 @@ const Navbar = () => {
       id="main-navbar"
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         isScrolled
-          ? 'bg-black/60 backdrop-blur-xl border-b border-white/10'
+          ? 'bg-[var(--glass-bg)] backdrop-blur-xl border-b border-[var(--color-border)] shadow-sm'
           : 'bg-transparent'
       }`}
     >
@@ -62,10 +74,10 @@ const Navbar = () => {
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-3 group">
-            <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-violet-600 to-purple-700 flex items-center justify-center shadow-[0_0_20px_-5px_rgba(139,92,246,0.5)]">
+            <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-violet-600 to-purple-700 flex items-center justify-center shadow-lg group-hover:shadow-purple-500/20 transition-all">
               <Briefcase className="w-5 h-5 text-white" />
             </div>
-            <span className="text-2xl font-bold tracking-tight text-white">
+            <span className="text-2xl font-bold tracking-tight text-[var(--color-text-primary)]">
               jobsearch
             </span>
           </Link>
@@ -76,7 +88,7 @@ const Navbar = () => {
               <Link
                 key={label}
                 to={to}
-                className="px-4 py-2 text-sm font-medium text-gray-300 hover:text-white transition-colors relative group"
+                className="px-4 py-2 text-sm font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors relative group"
               >
                 {label}
                 <span className="absolute bottom-0 left-4 right-4 h-0.5 bg-purple-500 scale-x-0 group-hover:scale-x-100 transition-transform duration-300" />
@@ -86,20 +98,20 @@ const Navbar = () => {
 
           {/* Right Actions */}
           <div className="hidden lg:flex items-center gap-5">
-            <button onClick={toggleDark} className="text-gray-400 hover:text-white transition-colors">
+            <button onClick={toggleDark} className="text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors">
               {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
             </button>
 
             {user ? (
               <div className="flex items-center gap-4">
-                <span className="text-sm text-gray-300 font-medium">{user.name}</span>
-                <button onClick={handleLogout} className="text-sm font-semibold text-gray-300 hover:text-white">
+                <span className="text-sm text-[var(--color-text-secondary)] font-medium">{user.name}</span>
+                <button onClick={handleLogout} className="text-sm font-semibold text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]">
                   Logout
                 </button>
               </div>
             ) : (
               <>
-                <Link to="/login" className="text-sm font-semibold text-gray-300 hover:text-white transition-colors">
+                <Link to="/login" className="text-sm font-semibold text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors">
                   Login
                 </Link>
                 <Link
