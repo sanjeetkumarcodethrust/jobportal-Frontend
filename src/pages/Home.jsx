@@ -26,10 +26,10 @@ const Home = () => {
           >
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(139,92,246,0.1),transparent)]" />
             <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 relative z-10">
-              Ready to land your <br /> dream job?
+              Ready to learn something new?
             </h2>
             <p className="text-gray-400 text-lg mb-10 max-w-xl mx-auto relative z-10">
-              Join thousands of professionals who have already found their next career move with jobsearch.
+              Join thousands of learners who have already discovered great study resources here.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 relative z-10">
               <button className="px-8 py-4 bg-white text-black font-bold rounded-2xl hover:bg-gray-100 transition-all hover:scale-[1.02]">

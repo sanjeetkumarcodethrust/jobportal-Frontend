@@ -43,7 +43,7 @@ const Footer = () => {
                 <Briefcase className="w-4 h-4 text-white" />
               </div>
               <span className="text-lg font-extrabold text-indigo-600 dark:text-indigo-400">
-                jobsearch
+                JobSearch
               </span>
             </Link>
             <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed mb-6 max-w-xs">

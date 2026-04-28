@@ -1,8 +1,8 @@
-# React + Vite
+# JobSearch
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A React + Vite job portal for finding your next career opportunity.
 
-Currently, two official plugins are available:
+This repository contains the frontend code and styling for the JobSearch application.
 
 - [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
 - [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)

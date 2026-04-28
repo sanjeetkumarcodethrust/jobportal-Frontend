@@ -78,7 +78,7 @@ const Navbar = () => {
               <Briefcase className="w-5 h-5 text-white" />
             </div>
             <span className="text-2xl font-bold tracking-tight text-[var(--color-text-primary)]">
-              jobsearch
+              JobSearch
             </span>
           </Link>
 
