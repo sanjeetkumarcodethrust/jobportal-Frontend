@@ -1,33 +1,19 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, MapPin, ChevronDown, Sparkles, TrendingUp, Star, Building2, Users, Briefcase } from 'lucide-react';
+import { Search, MapPin, Sparkles, Star, Building2, Users } from 'lucide-react';
 import { motion } from 'framer-motion';
-
-const EXPERIENCE_OPTIONS = [
-  'Fresher',
-  '1 Year',
-  '2 Years',
-  '3 Years',
-  '4 Years',
-  '5 Years',
-  '6-10 Years',
-  '10+ Years',
-];
+import SearchBar from './SearchBar';
 
 const Hero = () => {
-  const [skills, setSkills] = useState('');
-  const [experience, setExperience] = useState('');
-  const [location, setLocation] = useState('');
-  const [activeTab, setActiveTab] = useState('Find Jobs');
 
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState('Find Jobs');
 
-  const handleSearch = (e) => {
-    e.preventDefault();
+  const handleSearch = (searchData) => {
     const params = new URLSearchParams();
-    if (skills) params.append('skills', skills);
-    if (experience) params.append('experience', experience);
-    if (location) params.append('location', location);
+    if (searchData.skills) params.append('skills', searchData.skills);
+    if (searchData.experience) params.append('experience', searchData.experience);
+    if (searchData.location) params.append('location', searchData.location);
     navigate(`/jobs?${params.toString()}`);
   };
 
@@ -96,14 +82,9 @@ const Hero = () => {
         </div>
 
         {/* ── Search Container ─── */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="max-w-4xl mx-auto bg-[var(--color-surface)] backdrop-blur-xl border border-[var(--color-border)] rounded-[32px] p-6 shadow-2xl relative z-10"
-        >
+        <div className="relative">
           {/* Tabs */}
-          <div className="flex items-center justify-center gap-8 mb-8 border-b border-[var(--color-border)] pb-4">
+          <div className="flex items-center justify-center gap-8 mb-6 relative z-20">
             {['Find Jobs', 'Companies', 'Skills', 'Locations'].map((tab) => (
               <button
                 key={tab}
@@ -126,66 +107,10 @@ const Hero = () => {
               </button>
             ))}
           </div>
-
-          {/* Form */}
-          <form onSubmit={handleSearch} className="flex flex-col md:flex-row gap-4 items-center">
-            <div className="flex-1 w-full flex items-center gap-3 px-5 py-4 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-2xl focus-within:border-purple-500/50 transition-colors">
-              <Search className="w-5 h-5 text-[var(--color-text-muted)]" />
-              <input
-                type="text"
-                placeholder="Enter skills / designations / companies"
-                className="bg-transparent w-full outline-none text-[var(--color-text-primary)] text-sm"
-                value={skills}
-                onChange={(e) => setSkills(e.target.value)}
-              />
-            </div>
-
-            <div className="w-full md:w-48 flex items-center gap-3 px-5 py-4 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-2xl">
-              <Briefcase className="w-5 h-5 text-[var(--color-text-muted)]" />
-              <select 
-                className="bg-transparent w-full outline-none text-[var(--color-text-primary)] text-sm appearance-none cursor-pointer"
-                value={experience}
-                onChange={(e) => setExperience(e.target.value)}
-              >
-                <option value="" className="dark:bg-gray-900 bg-white">Select exp</option>
-                <option value="fresher" className="dark:bg-gray-900 bg-white">Fresher</option>
-                <option value="1-3" className="dark:bg-gray-900 bg-white">1-3 Years</option>
-              </select>
-            </div>
-
-            <div className="flex-1 w-full flex items-center gap-3 px-5 py-4 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-2xl">
-              <MapPin className="w-5 h-5 text-[var(--color-text-muted)]" />
-              <input
-                type="text"
-                placeholder="Enter location"
-                className="bg-transparent w-full outline-none text-[var(--color-text-primary)] text-sm"
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-              />
-            </div>
-
-            <button
-              type="submit"
-              className="w-full md:w-auto px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold rounded-2xl shadow-lg shadow-purple-500/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
-            >
-              Search Jobs
-            </button>
-          </form>
-
-          {/* Popular Searches */}
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-            <span className="text-sm text-[var(--color-text-muted)]">Popular Searches:</span>
-            {['Data Analyst', 'React Developer', 'Product Manager', 'UI/UX Designer', 'Python Developer'].map((tag) => (
-              <button
-                key={tag}
-                className="px-4 py-1.5 rounded-full bg-[var(--color-bg)] border border-[var(--color-border)] text-xs text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:border-purple-500/50 transition-all cursor-pointer"
-              >
-                {tag}
-              </button>
-            ))}
-          </div>
-        </motion.div>
+          <SearchBar onSearch={handleSearch} />
+        </div>
       </div>
+
 
       {/* ── Desktop Floating Stats (Section Level) ─── */}
       <div className="hidden lg:block">

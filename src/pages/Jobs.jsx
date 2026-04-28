@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { motion } from 'framer-motion';
 import { Briefcase, Building, MapPin, DollarSign, Clock, Search, ArrowRight } from 'lucide-react';
+import SearchBar from '../components/SearchBar';
 
 const Jobs = () => {
   const [jobs, setJobs] = useState([]);
@@ -10,9 +11,27 @@ const Jobs = () => {
   const [error, setError] = useState(null);
 
   const location = useLocation();
+  const navigate = useNavigate();
+
+  // Parse initial values from URL
+  const searchParams = new URLSearchParams(location.search);
+  const initialValues = {
+    skills: searchParams.get('skills') || '',
+    experience: searchParams.get('experience') || '',
+    location: searchParams.get('location') || '',
+  };
+
+  const handleSearch = (searchData) => {
+    const params = new URLSearchParams();
+    if (searchData.skills) params.append('skills', searchData.skills);
+    if (searchData.experience) params.append('experience', searchData.experience);
+    if (searchData.location) params.append('location', searchData.location);
+    navigate(`/jobs?${params.toString()}`);
+  };
 
   useEffect(() => {
     const fetchJobs = async () => {
+      setLoading(true);
       try {
         const res = await api.get(`/jobs${location.search}`);
         setJobs(res.data?.data || res.data || []);
@@ -28,20 +47,35 @@ const Jobs = () => {
   }, [location.search]);
 
   return (
-    <div className="bg-[var(--color-bg)] min-h-screen py-20 transition-colors duration-500">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <motion.div 
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-16"
-        >
-          <h1 className="text-4xl md:text-6xl font-extrabold text-[var(--color-text-primary)] tracking-tight mb-4">
-            Explore <span className="bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">Opportunities</span>
-          </h1>
-          <p className="text-lg text-[var(--color-text-secondary)] max-w-2xl mx-auto">
-            Find your dream job from our list of latest openings at top companies.
-          </p>
-        </motion.div>
+    <div className="bg-[var(--color-bg)] min-h-screen transition-colors duration-500">
+      {/* ── Header Section ─── */}
+      <section className="relative pt-32 pb-20 overflow-hidden border-b border-[var(--color-border)]">
+        {/* Background Gradients */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-violet-600/5 dark:bg-violet-600/10 blur-[100px]" />
+          <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-purple-600/5 dark:bg-purple-600/10 blur-[100px]" />
+        </div>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <motion.div 
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center mb-12"
+          >
+            <h1 className="text-4xl md:text-6xl font-extrabold text-[var(--color-text-primary)] tracking-tight mb-4">
+              Find your <span className="bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">dream job</span>
+            </h1>
+            <p className="text-lg text-[var(--color-text-secondary)] max-w-2xl mx-auto mb-10">
+              Explore thousands of job opportunities and take the next step in your career.
+            </p>
+            <SearchBar onSearch={handleSearch} initialValues={initialValues} />
+          </motion.div>
+        </div>
+      </section>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+
+
 
         {loading ? (
           <div className="flex flex-col items-center justify-center py-24">
