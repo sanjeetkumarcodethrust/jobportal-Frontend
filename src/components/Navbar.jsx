@@ -74,8 +74,8 @@ const Navbar = () => {
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-3 group">
-            <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-violet-600 to-purple-700 flex items-center justify-center shadow-lg group-hover:shadow-purple-500/20 transition-all">
-              <Briefcase className="w-5 h-5 text-white" />
+            <div className="relative w-10 h-10 flex items-center justify-center">
+              <img src="/favicon.svg" alt="JobSearch Logo" className="w-full h-full object-contain drop-shadow-md group-hover:drop-shadow-[0_0_12px_rgba(168,85,247,0.5)] transition-all duration-300" />
             </div>
             <span className="text-2xl font-bold tracking-tight text-[var(--color-text-primary)]">
               JobSearch

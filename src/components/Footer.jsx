@@ -39,10 +39,10 @@ const Footer = () => {
           {/* Brand Column */}
           <div className="col-span-2 md:col-span-1">
             <Link to="/" className="flex items-center gap-2 mb-4 group">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-blue-600 flex items-center justify-center shadow-sm">
-                <Briefcase className="w-4 h-4 text-white" />
+              <div className="w-8 h-8 flex items-center justify-center">
+                <img src="/favicon.svg" alt="JobSearch" className="w-full h-full object-contain" />
               </div>
-              <span className="text-lg font-extrabold text-indigo-600 dark:text-indigo-400">
+              <span className="text-lg font-extrabold text-[var(--color-text-primary)]">
                 JobSearch
               </span>
             </Link>
