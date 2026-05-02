@@ -45,11 +45,11 @@ const SearchBar = ({ onSearch, initialValues = {} }) => {
             value={experience}
             onChange={(e) => setExperience(e.target.value)}
           >
-            <option value="" className="dark:bg-gray-900 bg-white">Select exp</option>
-            <option value="fresher" className="dark:bg-gray-900 bg-white">Fresher</option>
-            <option value="1-3" className="dark:bg-gray-900 bg-white">1-3 Years</option>
-            <option value="3-5" className="dark:bg-gray-900 bg-white">3-5 Years</option>
-            <option value="5+" className="dark:bg-gray-900 bg-white">5+ Years</option>
+            <option value="" className="bg-white text-gray-900 dark:bg-gray-900 dark:text-white">Select exp</option>
+            <option value="fresher" className="bg-white text-gray-900 dark:bg-gray-900 dark:text-white">Fresher</option>
+            <option value="1-3" className="bg-white text-gray-900 dark:bg-gray-900 dark:text-white">1-3 Years</option>
+            <option value="3-5" className="bg-white text-gray-900 dark:bg-gray-900 dark:text-white">3-5 Years</option>
+            <option value="5+" className="bg-white text-gray-900 dark:bg-gray-900 dark:text-white">5+ Years</option>
           </select>
         </div>
 
