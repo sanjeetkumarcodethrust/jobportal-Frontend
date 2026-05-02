@@ -31,7 +31,7 @@ const Dashboard = () => {
   ];
 
   return (
-    <div className="bg-[var(--color-bg)] min-h-screen py-10 transition-colors duration-500">
+    <div className="bg-[var(--color-bg)] min-h-screen pt-32 pb-10 transition-colors duration-500">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div 
           initial={{ opacity: 0, x: -20 }}
