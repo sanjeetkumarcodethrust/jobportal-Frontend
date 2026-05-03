@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const COMPANIES = [
   { name: 'Google', logo: 'https://www.vectorlogo.zone/logos/google/google-icon.svg', color: 'group-hover:shadow-red-500/20' },
@@ -12,17 +13,19 @@ const COMPANIES = [
   { name: 'Tesla', logo: 'https://www.vectorlogo.zone/logos/tesla/tesla-icon.svg', color: 'group-hover:shadow-red-500/20' },
 ];
 
-const TopCompanies = () => {
+const TopCompanies = ({ showHeader = true }) => {
   return (
     <section className="py-24 bg-[var(--color-bg)] transition-colors duration-500">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between mb-12">
-          <h2 className="text-3xl font-extrabold text-[var(--color-text-primary)] tracking-tight">Top Companies Hiring</h2>
-          <button className="flex items-center gap-2 text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 transition-colors font-bold group">
-            View all companies
-            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-          </button>
-        </div>
+        {showHeader && (
+          <div className="flex items-center justify-between mb-12">
+            <h2 className="text-3xl font-extrabold text-[var(--color-text-primary)] tracking-tight">Top Companies Hiring</h2>
+            <Link to="/companies" className="flex items-center gap-2 text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 transition-colors font-bold group">
+              View all companies
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            </Link>
+          </div>
+        )}
 
         <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-6">
           {COMPANIES.map((company, i) => (
@@ -43,7 +46,7 @@ const TopCompanies = () => {
                 className="h-10 w-auto object-contain grayscale opacity-60 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-500 relative z-10 dark:invert-[0.1] dark:group-hover:invert-0"
                 onError={(e) => {
                    e.target.style.display = 'none';
-                   e.target.nextSibling.style.display = 'block';
+                   if (e.target.nextSibling) e.target.nextSibling.style.display = 'block';
                 }}
               />
               <span className="hidden text-xs font-bold text-[var(--color-text-primary)] relative z-10">{company.name}</span>
@@ -56,3 +59,4 @@ const TopCompanies = () => {
 };
 
 export default TopCompanies;
+
