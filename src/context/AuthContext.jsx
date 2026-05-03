@@ -4,23 +4,29 @@ import api from '../services/api';
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() => {
+    const savedUser = localStorage.getItem('user');
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
   const [loading, setLoading] = useState(true);
 
   const getProfile = useCallback(async () => {
     const token = localStorage.getItem('token');
     if (!token) {
       setLoading(false);
+      setUser(null);
       return;
     }
 
     try {
       const res = await api.get('/auth/me');
-      setUser(res.data);
+      if (res.data) {
+        setUser(res.data);
+        localStorage.setItem('user', JSON.stringify(res.data));
+      }
     } catch (error) {
       console.error('Failed to fetch profile:', error);
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
+      logout();
     } finally {
       setLoading(false);
     }
@@ -36,11 +42,11 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem('token', token);
   };
 
-  const logout = () => {
+  const logout = useCallback(() => {
     setUser(null);
     localStorage.removeItem('user');
     localStorage.removeItem('token');
-  };
+  }, []);
 
   return (
     <AuthContext.Provider value={{ user, login, logout, loading, getProfile }}>

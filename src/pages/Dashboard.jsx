@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { Briefcase, Users, MessageSquare, TrendingUp } from 'lucide-react';
 
 const Dashboard = () => {
-  const { user } = useContext(AuthContext);
+  const { user, loading } = useContext(AuthContext);
 
   const stats = [
     { 
@@ -29,6 +29,14 @@ const Dashboard = () => {
       textColor: 'text-pink-500'
     },
   ];
+
+  if (loading && !user) {
+    return (
+      <div className="bg-[var(--color-bg)] min-h-screen flex items-center justify-center">
+        <div className="w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-[var(--color-bg)] min-h-screen pt-32 pb-10 transition-colors duration-500">
