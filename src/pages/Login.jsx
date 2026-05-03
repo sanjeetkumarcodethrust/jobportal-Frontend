@@ -2,24 +2,33 @@ import { useState, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Mail, Lock, ArrowRight } from 'lucide-react';
+import { Mail, Lock, ArrowRight, Loader2 } from 'lucide-react';
+import api from '../services/api';
 
 const Login = () => {
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    const mockUser = {
-      id: 1,
-      name: 'John Doe',
-      email: email,
-      role: email.includes('recruiter') ? 'recruiter' : 'jobseeker'
-    };
-    login(mockUser, 'mock-jwt-token');
-    navigate('/dashboard');
+    setError('');
+    setIsSubmitting(true);
+
+    try {
+      const res = await api.post('/auth/login', { email, password });
+      const { token, ...userData } = res.data;
+      login(userData, token);
+      navigate('/dashboard');
+    } catch (err) {
+      console.error('Login error:', err);
+      setError(err.response?.data?.message || 'Invalid email or password');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -45,6 +54,15 @@ const Login = () => {
       >
         <div className="bg-[var(--color-surface)] p-8 rounded-3xl shadow-xl border border-[var(--color-border)] backdrop-blur-xl">
           <form className="space-y-6" onSubmit={handleLogin}>
+            {error && (
+              <motion.div 
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-xs font-bold text-center"
+              >
+                {error}
+              </motion.div>
+            )}
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-[var(--color-text-primary)] mb-2">
                 Email address
@@ -89,10 +107,17 @@ const Login = () => {
 
             <button
               type="submit"
-              className="group relative flex w-full justify-center rounded-2xl bg-gradient-to-r from-violet-600 to-purple-600 px-3 py-4 text-sm font-bold text-white shadow-lg shadow-purple-500/20 hover:shadow-purple-500/40 transition-all hover:scale-[1.02] active:scale-[0.98]"
+              disabled={isSubmitting}
+              className="group relative flex w-full justify-center rounded-2xl bg-gradient-to-r from-violet-600 to-purple-600 px-3 py-4 text-sm font-bold text-white shadow-lg shadow-purple-500/20 hover:shadow-purple-500/40 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:scale-100"
             >
-              Sign in
-              <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+              {isSubmitting ? (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              ) : (
+                <>
+                  Sign in
+                  <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                </>
+              )}
             </button>
           </form>
 

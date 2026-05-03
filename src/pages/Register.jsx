@@ -1,16 +1,21 @@
-import { useState } from 'react';
+import { useState, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { User, Mail, Lock, Building2, Users, ArrowRight } from 'lucide-react';
+import { User, Mail, Lock, Building2, Users, ArrowRight, Loader2 } from 'lucide-react';
+import api from '../services/api';
+import { AuthContext } from '../context/AuthContext';
 
 const Register = () => {
   const navigate = useNavigate();
+  const { login } = useContext(AuthContext);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
     role: 'jobseeker'
   });
+  const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e) => {
     setFormData({
@@ -19,9 +24,22 @@ const Register = () => {
     });
   };
 
-  const handleRegister = (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
-    navigate('/login');
+    setError('');
+    setIsSubmitting(true);
+
+    try {
+      const res = await api.post('/auth/register', formData);
+      const { token, ...userData } = res.data;
+      login(userData, token);
+      navigate('/dashboard');
+    } catch (err) {
+      console.error('Registration error:', err);
+      setError(err.response?.data?.message || 'Registration failed. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -47,6 +65,15 @@ const Register = () => {
       >
         <div className="bg-[var(--color-surface)] p-8 rounded-3xl shadow-xl border border-[var(--color-border)] backdrop-blur-xl">
           <form className="space-y-6" onSubmit={handleRegister}>
+            {error && (
+              <motion.div 
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-xs font-bold text-center"
+              >
+                {error}
+              </motion.div>
+            )}
             <div>
               <label className="block text-sm font-medium text-[var(--color-text-primary)] mb-4">
                 I am a...
@@ -146,10 +173,17 @@ const Register = () => {
 
             <button
               type="submit"
-              className="group relative flex w-full justify-center rounded-2xl bg-gradient-to-r from-violet-600 to-purple-600 px-3 py-4 text-sm font-bold text-white shadow-lg shadow-purple-500/20 hover:shadow-purple-500/40 transition-all hover:scale-[1.02] active:scale-[0.98]"
+              disabled={isSubmitting}
+              className="group relative flex w-full justify-center rounded-2xl bg-gradient-to-r from-violet-600 to-purple-600 px-3 py-4 text-sm font-bold text-white shadow-lg shadow-purple-500/20 hover:shadow-purple-500/40 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
             >
-              Get Started
-              <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+              {isSubmitting ? (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              ) : (
+                <>
+                  Get Started
+                  <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                </>
+              )}
             </button>
           </form>
 

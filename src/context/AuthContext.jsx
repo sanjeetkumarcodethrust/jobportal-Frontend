@@ -1,4 +1,5 @@
-import { createContext, useState, useEffect } from 'react';
+import { createContext, useState, useEffect, useCallback } from 'react';
+import api from '../services/api';
 
 export const AuthContext = createContext();
 
@@ -6,14 +7,28 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    // Check if user is logged in (e.g., from local storage or API check)
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
+  const getProfile = useCallback(async () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setLoading(false);
+      return;
     }
-    setLoading(false);
+
+    try {
+      const res = await api.get('/auth/me');
+      setUser(res.data);
+    } catch (error) {
+      console.error('Failed to fetch profile:', error);
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    getProfile();
+  }, [getProfile]);
 
   const login = (userData, token) => {
     setUser(userData);
@@ -28,7 +43,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, loading }}>
+    <AuthContext.Provider value={{ user, login, logout, loading, getProfile }}>
       {children}
     </AuthContext.Provider>
   );
