@@ -10,9 +10,12 @@ const api = axios.create({
 // Request interceptor to add the auth token to headers
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    // Skip adding Authorization for login endpoint to avoid stale token causing 401
+    if (!config.url?.includes('/auth/login')) {
+      const token = localStorage.getItem('token');
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
     }
     return config;
   },
