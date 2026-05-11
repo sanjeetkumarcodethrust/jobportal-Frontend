@@ -9,11 +9,14 @@ export const searchJobs = async (filters = {}) => {
     experience,
     location,
   }).toString();
-  const response = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/jobs?${query}`);
+  
+  const baseURL = import.meta.env.VITE_API_URL || '/api';
+  const response = await fetch(`${baseURL}/jobs?${query}`);
+  
   if (!response.ok) {
     const errorText = await response.text();
     throw new Error(`Failed to fetch jobs: ${response.status} ${errorText}`);
   }
   const data = await response.json();
-  return data; // Expect an array of job objects
+  return data?.data || data || []; // Expect an array of job objects
 };

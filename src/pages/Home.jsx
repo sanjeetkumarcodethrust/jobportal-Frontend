@@ -1,28 +1,18 @@
 import Hero from '../components/Hero';
 import Features from '../components/Features';
 import TopCompanies from '../components/TopCompanies';
-import SearchBar from '../components/SearchBar';
 import JobList from '../components/JobList';
 import { motion } from 'framer-motion';
-import { useState } from 'react';
 
 const Home = () => {
-  const [searchFilters, setSearchFilters] = useState({});
-  const handleSearch = (filters) => {
-    setSearchFilters(filters);
-  };
-
   return (
     <div className="bg-[#030712] min-h-screen">
       {/* ── Hero Section ─── */}
       <Hero />
-        {/* Search Bar */}
-        <div className="my-8 max-w-4xl mx-auto">
-          <SearchBar onSearch={handleSearch} />
-        </div>
+      
         {/* Job List Results */}
         <div className="my-8 max-w-4xl mx-auto">
-          <JobList filters={searchFilters} />
+          <JobList filters={{}} />
         </div>
 
         {/* ── Features Section ─── */}
