@@ -12,7 +12,7 @@ const Register = () => {
     name: '',
     email: '',
     password: '',
-    role: 'jobseeker'
+    role: 'candidate'
   });
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -81,9 +81,9 @@ const Register = () => {
               <div className="grid grid-cols-2 gap-4">
                 <button
                   type="button"
-                  onClick={() => setFormData({...formData, role: 'jobseeker'})}
+                  onClick={() => setFormData({...formData, role: 'candidate'})}
                   className={`flex flex-col items-center gap-2 p-4 rounded-2xl border transition-all ${
-                    formData.role === 'jobseeker' 
+                    formData.role === 'candidate' 
                     ? 'border-purple-500 bg-purple-500/10 text-purple-500' 
                     : 'border-[var(--color-border)] text-[var(--color-text-secondary)] hover:border-purple-500/50'
                   }`}
