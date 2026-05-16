@@ -1,18 +1,44 @@
+import { useContext } from 'react';
 import Hero from '../components/Hero';
 import Features from '../components/Features';
 import TopCompanies from '../components/TopCompanies';
 import JobList from '../components/JobList';
 import { motion } from 'framer-motion';
+import { AuthContext } from '../context/AuthContext';
 
 const Home = () => {
+  const { user } = useContext(AuthContext);
+
+  // Create personalized filters based on user profile
+  const personalizedFilters = {};
+  if (user) {
+    if (user.skills && user.skills.length > 0) {
+      personalizedFilters.skills = user.skills.join(',');
+    }
+    if (user.jobPreferences?.jobTypes && user.jobPreferences.jobTypes.length > 0) {
+      personalizedFilters.jobType = user.jobPreferences.jobTypes.join(',');
+    }
+    if (user.jobPreferences?.locations && user.jobPreferences.locations.length > 0) {
+      personalizedFilters.location = user.jobPreferences.locations.join(',');
+    }
+  }
+
   return (
     <div className="bg-[#030712] min-h-screen">
       {/* ── Hero Section ─── */}
       <Hero />
       
         {/* Job List Results */}
-        <div className="my-8 max-w-4xl mx-auto">
-          <JobList filters={{}} />
+        <div className="my-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="mb-8">
+            <h2 className="text-3xl font-bold text-white mb-2">
+              {user ? 'Recommended For You' : 'Latest Jobs'}
+            </h2>
+            <p className="text-gray-400">
+              {user ? 'Jobs matching your profile and preferences.' : 'Explore our most recent job postings.'}
+            </p>
+          </div>
+          <JobList filters={personalizedFilters} />
         </div>
 
         {/* ── Features Section ─── */}

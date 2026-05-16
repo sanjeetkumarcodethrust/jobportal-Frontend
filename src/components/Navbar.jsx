@@ -105,6 +105,9 @@ const Navbar = () => {
             {user ? (
               <div className="flex items-center gap-4">
                 <span className="text-sm text-[var(--color-text-secondary)] font-medium">{user.name}</span>
+                <Link to="/profile" className="text-sm font-semibold text-purple-500 hover:text-purple-400 transition-colors">
+                  Profile
+                </Link>
                 <button onClick={handleLogout} className="text-sm font-semibold text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]">
                   Logout
                 </button>

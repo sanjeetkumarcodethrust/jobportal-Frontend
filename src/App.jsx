@@ -10,8 +10,7 @@ import Jobs from './pages/Jobs';
 import Companies from './pages/Companies';
 import Services from './pages/Services';
 import Resources from './pages/Resources';
-
-
+import Profile from './pages/Profile';
 function App() {
   return (
     <div className="min-h-screen flex flex-col bg-[var(--color-bg)] text-[var(--color-text-primary)] transition-colors duration-300">
@@ -26,7 +25,7 @@ function App() {
           <Route path="/companies" element={<Companies />} />
           <Route path="/services" element={<Services />} />
           <Route path="/resources" element={<Resources />} />
-
+          <Route path="/profile" element={<Profile />} />
 
           {/* Add more routes like /post-job, etc. here */}
         </Routes>
