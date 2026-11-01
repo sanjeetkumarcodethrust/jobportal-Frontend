@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, Link } from 'react-router-dom';
 import api from '../services/api';
 import { motion } from 'framer-motion';
 import { Briefcase, Building, MapPin, DollarSign, Clock, Search, ArrowRight } from 'lucide-react';
@@ -153,7 +153,8 @@ const Jobs = () => {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4, delay: index * 0.05 }}
                     whileHover={{ y: -8 }}
-                    className="bg-[var(--color-surface)] rounded-[32px] p-8 border border-[var(--color-border)] shadow-xl hover:shadow-purple-500/5 transition-all group backdrop-blur-xl relative overflow-hidden"
+                    onClick={() => navigate(`/jobs/${job._id || job.id}`)}
+                    className="bg-[var(--color-surface)] rounded-[32px] p-8 border border-[var(--color-border)] shadow-xl hover:shadow-purple-500/5 transition-all group backdrop-blur-xl relative overflow-hidden cursor-pointer"
                   >
                     <div className="flex justify-between items-start mb-6">
                       <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500/10 to-purple-600/10 flex items-center justify-center text-indigo-500 shrink-0 group-hover:scale-110 transition-transform">
@@ -188,10 +189,14 @@ const Jobs = () => {
                         <Clock className="w-4 h-4 mr-2" />
                         {job.postedAt || job.createdAt ? new Date(job.postedAt || job.createdAt).toLocaleDateString() : 'Active Now'}
                       </div>
-                      <button className="flex items-center gap-2 text-sm font-bold text-purple-500 hover:text-purple-400 transition-colors group/btn">
+                      <Link 
+                        to={`/jobs/${job._id || job.id}`}
+                        onClick={(e) => e.stopPropagation()}
+                        className="flex items-center gap-2 text-sm font-bold text-purple-500 hover:text-purple-400 transition-colors group/btn"
+                      >
                         View Job
                         <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
-                      </button>
+                      </Link>
                     </div>
 
                     {/* Decorative Gradient */}

@@ -7,6 +7,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import Jobs from './pages/Jobs';
+import JobDetails from './pages/JobDetails';
 import Companies from './pages/Companies';
 import Services from './pages/Services';
 import Resources from './pages/Resources';
@@ -22,6 +23,7 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/jobs" element={<Jobs />} />
+          <Route path="/jobs/:id" element={<JobDetails />} />
           <Route path="/companies" element={<Companies />} />
           <Route path="/services" element={<Services />} />
           <Route path="/resources" element={<Resources />} />

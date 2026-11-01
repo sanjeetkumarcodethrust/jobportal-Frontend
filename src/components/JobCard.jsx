@@ -1,16 +1,19 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Building, MapPin, DollarSign, Clock, ArrowRight } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const JobCard = ({ job, index = 0 }) => {
+  const navigate = useNavigate();
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: index * 0.05 }}
       whileHover={{ y: -8 }}
-      className="bg-[var(--color-surface)] rounded-[32px] p-8 border border-[var(--color-border)] shadow-xl hover:shadow-purple-500/5 transition-all group backdrop-blur-xl relative overflow-hidden"
+      onClick={() => navigate(`/jobs/${job._id || job.id}`)}
+      className="bg-[var(--color-surface)] rounded-[32px] p-8 border border-[var(--color-border)] shadow-xl hover:shadow-purple-500/5 transition-all group backdrop-blur-xl relative overflow-hidden cursor-pointer"
     >
       <div className="flex justify-between items-start mb-6">
         <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500/10 to-purple-600/10 flex items-center justify-center text-indigo-500 shrink-0 group-hover:scale-110 transition-transform">
@@ -47,7 +50,11 @@ const JobCard = ({ job, index = 0 }) => {
           <Clock className="w-4 h-4 mr-2" />
           {job.postedAt || job.createdAt ? new Date(job.postedAt || job.createdAt).toLocaleDateString() : 'Active Now'}
         </div>
-        <Link to={`/jobs/${job._id || job.id}`} className="flex items-center gap-2 text-sm font-bold text-purple-500 hover:text-purple-400 transition-colors group/btn">
+        <Link 
+          to={`/jobs/${job._id || job.id}`} 
+          onClick={(e) => e.stopPropagation()}
+          className="flex items-center gap-2 text-sm font-bold text-purple-500 hover:text-purple-400 transition-colors group/btn"
+        >
           View Job
           <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
         </Link>
