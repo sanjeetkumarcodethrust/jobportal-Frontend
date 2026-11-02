@@ -2,7 +2,7 @@ import { useState, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Mail, Lock, ArrowRight, Loader2 } from 'lucide-react';
+import { Mail, Lock, ArrowRight, Loader2, Sparkles } from 'lucide-react';
 import api from '../services/api';
 
 const Login = () => {
@@ -13,19 +13,35 @@ const Login = () => {
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
+  const handleLogin = async (e, customEmail, customPassword) => {
+    if (e) e.preventDefault();
     setError('');
     setIsSubmitting(true);
 
+    const emailToUse = (customEmail !== undefined ? customEmail : email).trim();
+    const passwordToUse = customPassword !== undefined ? customPassword : password;
+
+    if (!emailToUse || !passwordToUse) {
+      setError('Please provide email and password');
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
-      const res = await api.post('/auth/login', { email, password });
+      const res = await api.post('/auth/login', {
+        email: emailToUse,
+        password: passwordToUse,
+      });
       const { token, ...userData } = res.data;
       login(userData, token);
       navigate('/dashboard');
     } catch (err) {
       console.error('Login error:', err);
-      setError(err.response?.data?.message || 'Invalid email or password');
+      const msg =
+        err.response?.data?.message ||
+        err.message ||
+        'Invalid email or password';
+      setError(msg);
     } finally {
       setIsSubmitting(false);
     }
@@ -33,7 +49,7 @@ const Login = () => {
 
   return (
     <div className="flex min-h-[calc(100vh-80px)] flex-1 flex-col justify-center px-6 py-12 lg:px-8 bg-[var(--color-bg)] transition-colors duration-500">
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="sm:mx-auto sm:w-full sm:max-w-sm"
@@ -46,25 +62,37 @@ const Login = () => {
         </p>
       </motion.div>
 
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
         className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm"
       >
         <div className="bg-[var(--color-surface)] p-8 rounded-3xl shadow-xl border border-[var(--color-border)] backdrop-blur-xl">
-          <form className="space-y-6" onSubmit={handleLogin}>
+          <form className="space-y-6" onSubmit={(e) => handleLogin(e)}>
             {error && (
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
-                className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-xs font-bold text-center"
+                className="p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-500 text-xs font-semibold text-center space-y-2"
               >
-                {error}
+                <p>{error}</p>
+                {error.toLowerCase().includes('register') && (
+                  <Link
+                    to="/register"
+                    className="inline-block px-4 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs transition-colors"
+                  >
+                    Go to Register
+                  </Link>
+                )}
               </motion.div>
             )}
+
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-[var(--color-text-primary)] mb-2">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-[var(--color-text-primary)] mb-2"
+              >
                 Email address
               </label>
               <div className="relative group">
@@ -85,7 +113,10 @@ const Login = () => {
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-[var(--color-text-primary)] mb-2">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-[var(--color-text-primary)] mb-2"
+              >
                 Password
               </label>
               <div className="relative group">
@@ -121,7 +152,43 @@ const Login = () => {
             </button>
           </form>
 
-          <p className="mt-8 text-center text-sm text-[var(--color-text-secondary)]">
+          {/* Quick Demo Login Access */}
+          <div className="mt-8 pt-6 border-t border-[var(--color-border)]">
+            <div className="flex items-center justify-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-3">
+              <Sparkles className="w-3.5 h-3.5 text-purple-500" />
+              <span>Quick Demo Access</span>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setEmail('candidate@jobportal.com');
+                  setPassword('password123');
+                  handleLogin(null, 'candidate@jobportal.com', 'password123');
+                }}
+                disabled={isSubmitting}
+                className="py-3 px-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] hover:border-purple-500/50 text-xs font-bold text-[var(--color-text-primary)] hover:text-purple-500 transition-all flex flex-col items-center gap-1 shadow-sm"
+              >
+                <span>Candidate Demo</span>
+                <span className="text-[10px] text-[var(--color-text-muted)] font-normal">Job Seeker</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setEmail('recruiter@jobportal.com');
+                  setPassword('password123');
+                  handleLogin(null, 'recruiter@jobportal.com', 'password123');
+                }}
+                disabled={isSubmitting}
+                className="py-3 px-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] hover:border-purple-500/50 text-xs font-bold text-[var(--color-text-primary)] hover:text-purple-500 transition-all flex flex-col items-center gap-1 shadow-sm"
+              >
+                <span>Recruiter Demo</span>
+                <span className="text-[10px] text-[var(--color-text-muted)] font-normal">Hiring Manager</span>
+              </button>
+            </div>
+          </div>
+
+          <p className="mt-6 text-center text-sm text-[var(--color-text-secondary)]">
             Don't have an account?{' '}
             <Link to="/register" className="font-bold text-purple-500 hover:text-purple-400">
               Create one
