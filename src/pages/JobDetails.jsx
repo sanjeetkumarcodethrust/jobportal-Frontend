@@ -49,6 +49,15 @@ const JobDetails = () => {
         const res = await api.get(`/jobs/${id}`);
         setJob(res.data);
 
+        // Check if this job is saved in localStorage
+        try {
+          const savedList = JSON.parse(localStorage.getItem('saved_jobs') || '[]');
+          const isSaved = savedList.some((j) => (j._id || j.id) === id);
+          setSaved(isSaved);
+        } catch {
+          // Ignore
+        }
+
         // Pre-fill resume input if user has one
         if (user?.resume) {
           setResumeInput(user.resume);
@@ -130,7 +139,34 @@ const JobDetails = () => {
   };
 
   const handleSaveToggle = () => {
-    setSaved(!saved);
+    if (!job) return;
+    try {
+      const savedList = JSON.parse(localStorage.getItem('saved_jobs') || '[]');
+      let updated;
+      if (saved) {
+        updated = savedList.filter((j) => (j._id || j.id) !== id);
+        setSaved(false);
+      } else {
+        updated = [
+          ...savedList.filter((j) => (j._id || j.id) !== id),
+          {
+            _id: job._id || id,
+            title: job.title,
+            company: job.company,
+            location: job.location,
+            salary: job.salary,
+            jobType: job.jobType,
+            experience: job.experience,
+            category: job.category,
+            postedAt: job.postedAt || job.createdAt,
+          },
+        ];
+        setSaved(true);
+      }
+      localStorage.setItem('saved_jobs', JSON.stringify(updated));
+    } catch (err) {
+      console.error('Failed to update saved jobs:', err);
+    }
   };
 
   const isHtml = (str) => {
