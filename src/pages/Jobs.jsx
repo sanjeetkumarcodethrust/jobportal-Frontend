@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import api from '../services/api';
 import { motion } from 'framer-motion';
-import { Briefcase, Building, MapPin, DollarSign, Clock, Search, ArrowRight } from 'lucide-react';
+import { Briefcase, Building, MapPin, DollarSign, Clock, Search, ArrowRight, RotateCcw } from 'lucide-react';
 import SearchBar from '../components/SearchBar';
 import JobFilters from '../components/JobFilters';
 
@@ -17,7 +17,7 @@ const Jobs = () => {
   // Parse initial values from URL
   const searchParams = new URLSearchParams(location.search);
   const initialValues = {
-    skills: searchParams.get('skills') || '',
+    skills: searchParams.get('skills') || searchParams.get('search') || '',
     experience: searchParams.get('experience') || '',
     location: searchParams.get('location') || '',
   };
@@ -51,9 +51,14 @@ const Jobs = () => {
     navigate(`/jobs?${params.toString()}`);
   };
 
+  const handleResetFilters = () => {
+    navigate('/jobs');
+  };
+
   useEffect(() => {
     const fetchJobs = async () => {
       setLoading(true);
+      setError(null);
       try {
         const res = await api.get(`/jobs${location.search}`);
         setJobs(res.data?.data || res.data || []);
@@ -67,6 +72,14 @@ const Jobs = () => {
 
     fetchJobs();
   }, [location.search]);
+
+  const hasActiveFilters = Boolean(
+    initialValues.skills ||
+    initialValues.experience ||
+    initialValues.location ||
+    searchParams.get('jobType') ||
+    searchParams.get('category')
+  );
 
   return (
     <div className="bg-[var(--color-bg)] min-h-screen transition-colors duration-500">
@@ -111,10 +124,32 @@ const Jobs = () => {
 
           {/* Job Results */}
           <div className="w-full lg:w-3/4">
-            <div className="mb-6 flex justify-between items-center">
-              <h2 className="text-xl font-bold text-[var(--color-text-primary)]">
-                {loading ? 'Searching jobs...' : `${jobs.length} Jobs Found`}
-              </h2>
+            <div className="mb-6 flex flex-wrap justify-between items-center gap-4">
+              <div>
+                <h2 className="text-xl font-bold text-[var(--color-text-primary)]">
+                  {loading ? 'Searching jobs...' : `${jobs.length} Jobs Found`}
+                </h2>
+                {hasActiveFilters && !loading && (
+                  <p className="text-xs text-[var(--color-text-secondary)] mt-1">
+                    Matching criteria: {[
+                      initialValues.skills && `Role: "${initialValues.skills}"`,
+                      initialValues.experience && `Exp: ${initialValues.experience}`,
+                      initialValues.location && `Location: "${initialValues.location}"`,
+                      searchParams.get('jobType') && `Type: ${searchParams.get('jobType')}`,
+                    ].filter(Boolean).join(' • ')}
+                  </p>
+                )}
+              </div>
+
+              {hasActiveFilters && (
+                <button
+                  onClick={handleResetFilters}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] hover:border-purple-500/50 text-xs font-semibold text-[var(--color-text-secondary)] hover:text-purple-500 transition-colors cursor-pointer"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  Reset all filters
+                </button>
+              )}
             </div>
 
             {loading ? (
@@ -131,18 +166,34 @@ const Jobs = () => {
                 className="bg-red-500/10 border border-red-500/20 text-red-500 p-8 rounded-[32px] text-center max-w-2xl mx-auto"
               >
                 <p className="text-lg font-bold">{error}</p>
+                <button
+                  onClick={() => window.location.reload()}
+                  className="mt-4 px-6 py-2 bg-red-500 text-white rounded-xl text-sm font-semibold hover:bg-red-600 transition-colors"
+                >
+                  Retry
+                </button>
               </motion.div>
             ) : jobs.length === 0 ? (
               <motion.div 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="text-center py-24 text-[var(--color-text-secondary)] bg-[var(--color-surface)] rounded-[40px] border border-[var(--color-border)] shadow-2xl backdrop-blur-xl w-full"
+                className="text-center py-20 px-6 text-[var(--color-text-secondary)] bg-[var(--color-surface)] rounded-[40px] border border-[var(--color-border)] shadow-2xl backdrop-blur-xl w-full"
               >
                 <div className="w-20 h-20 bg-purple-500/10 rounded-3xl flex items-center justify-center mx-auto mb-6 text-purple-500">
                   <Search className="w-10 h-10" />
                 </div>
-                <h3 className="text-2xl font-bold text-[var(--color-text-primary)] mb-2">No jobs found</h3>
-                <p>Try adjusting your search filters to find more opportunities.</p>
+                <h3 className="text-2xl font-bold text-[var(--color-text-primary)] mb-2">No matching jobs found</h3>
+                <p className="max-w-md mx-auto mb-8 text-sm text-[var(--color-text-muted)]">
+                  We couldn't find exact matches for your search. Try broadening your keywords, clearing experience levels, or exploring all opportunities.
+                </p>
+                <div className="flex flex-wrap justify-center gap-3">
+                  <button
+                    onClick={handleResetFilters}
+                    className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold rounded-2xl shadow-lg shadow-purple-500/20 transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+                  >
+                    Clear Filters & Show All Jobs
+                  </button>
+                </div>
               </motion.div>
             ) : (
               <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-2">
@@ -181,6 +232,10 @@ const Jobs = () => {
                       <div className="flex items-center text-[var(--color-text-secondary)]">
                         <DollarSign className="w-5 h-5 mr-3 shrink-0" />
                         <span className="font-medium line-clamp-1">{job.salary || 'Competitive Salary'}</span>
+                      </div>
+                      <div className="flex items-center text-[var(--color-text-secondary)]">
+                        <Briefcase className="w-5 h-5 mr-3 shrink-0 text-purple-500/70" />
+                        <span className="text-xs font-medium line-clamp-1">{job.experience || 'Experience: Any'}</span>
                       </div>
                     </div>
 

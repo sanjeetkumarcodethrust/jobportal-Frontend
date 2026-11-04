@@ -2,6 +2,16 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Filter, X } from 'lucide-react';
 
+const normalizeExpValue = (val) => {
+  if (!val) return '';
+  const lower = val.toLowerCase().trim();
+  if (lower === 'fresher' || lower.includes('entry') || lower.includes('0-1')) return 'fresher';
+  if (lower === '1-3' || lower.includes('1-3') || lower === 'mid level') return '1-3';
+  if (lower === '3-5' || lower.includes('3-5')) return '3-5';
+  if (lower === '5+' || lower.includes('5+') || lower.includes('senior') || lower.includes('director') || lower.includes('executive')) return '5+';
+  return val;
+};
+
 const JobFilters = ({ onFilterChange, initialFilters }) => {
   const [filters, setFilters] = useState({
     jobType: [],
@@ -12,9 +22,12 @@ const JobFilters = ({ onFilterChange, initialFilters }) => {
   // Keep local state in sync with initial values (from URL)
   useEffect(() => {
     if (initialFilters) {
+      const rawExpList = initialFilters.experience ? initialFilters.experience.split(',') : [];
+      const normalizedExpList = rawExpList.map(normalizeExpValue).filter(Boolean);
+
       setFilters({
         jobType: initialFilters.jobType ? initialFilters.jobType.split(',') : [],
-        experience: initialFilters.experience ? initialFilters.experience.split(',') : [],
+        experience: normalizedExpList,
         category: initialFilters.category ? initialFilters.category.split(',') : [],
       });
     }
@@ -22,10 +35,23 @@ const JobFilters = ({ onFilterChange, initialFilters }) => {
 
   const jobTypes = ['Full-time', 'Part-time', 'Contract', 'Remote', 'Internship'];
   
-  // These categories are popular ones. They could be fetched dynamically, but hardcoding for demo is fine
-  const categories = ['Software Development', 'Data Science', 'Design', 'Marketing', 'Sales', 'Product', 'HR', 'Finance'];
+  const categories = [
+    'Software Development',
+    'Data Science',
+    'Design',
+    'Marketing',
+    'Sales',
+    'Product',
+    'HR',
+    'Finance',
+  ];
   
-  const experiences = ['Entry Level', 'Mid Level', 'Senior Level', 'Director', 'Executive'];
+  const experiences = [
+    { label: 'Fresher / Entry Level (0-1 yrs)', value: 'fresher' },
+    { label: '1-3 Years', value: '1-3' },
+    { label: '3-5 Years', value: '3-5' },
+    { label: '5+ Years (Senior / Lead)', value: '5+' },
+  ];
 
   const handleCheckboxChange = (filterCategory, value) => {
     const currentValues = filters[filterCategory];
@@ -40,7 +66,7 @@ const JobFilters = ({ onFilterChange, initialFilters }) => {
     onFilterChange({
       jobType: newFilters.jobType.join(','),
       experience: newFilters.experience.join(','),
-      category: newFilters.category.join(',')
+      category: newFilters.category.join(','),
     });
   };
 
@@ -50,7 +76,7 @@ const JobFilters = ({ onFilterChange, initialFilters }) => {
     onFilterChange({ jobType: '', experience: '', category: '' });
   };
 
-  const hasActiveFilters = Object.values(filters).some(arr => arr.length > 0);
+  const hasActiveFilters = Object.values(filters).some((arr) => arr.length > 0);
 
   return (
     <div className="bg-[var(--color-surface)] rounded-[32px] p-6 border border-[var(--color-border)] shadow-xl relative overflow-hidden backdrop-blur-xl">
@@ -62,7 +88,7 @@ const JobFilters = ({ onFilterChange, initialFilters }) => {
         {hasActiveFilters && (
           <button 
             onClick={clearFilters}
-            className="text-xs font-semibold text-red-500 hover:text-red-400 flex items-center gap-1 transition-colors"
+            className="text-xs font-semibold text-red-500 hover:text-red-400 flex items-center gap-1 transition-colors cursor-pointer"
           >
             <X className="w-3 h-3" /> Clear All
           </button>
@@ -102,13 +128,13 @@ const JobFilters = ({ onFilterChange, initialFilters }) => {
           <h3 className="text-sm font-semibold text-[var(--color-text-primary)] mb-3">Experience Level</h3>
           <div className="space-y-2">
             {experiences.map((exp) => (
-              <label key={exp} className="flex items-center gap-3 cursor-pointer group">
+              <label key={exp.value} className="flex items-center gap-3 cursor-pointer group">
                 <div className="relative flex items-center justify-center w-5 h-5">
                   <input
                     type="checkbox"
                     className="peer appearance-none w-5 h-5 border-2 border-[var(--color-border)] rounded md:rounded-md checked:bg-purple-500 checked:border-purple-500 transition-colors cursor-pointer"
-                    checked={filters.experience.includes(exp)}
-                    onChange={() => handleCheckboxChange('experience', exp)}
+                    checked={filters.experience.includes(exp.value)}
+                    onChange={() => handleCheckboxChange('experience', exp.value)}
                   />
                   <div className="absolute text-white opacity-0 peer-checked:opacity-100 pointer-events-none">
                     <svg className="w-3 h-3" viewBox="0 0 20 20" fill="currentColor">
@@ -117,7 +143,7 @@ const JobFilters = ({ onFilterChange, initialFilters }) => {
                   </div>
                 </div>
                 <span className="text-sm text-[var(--color-text-secondary)] group-hover:text-purple-500 transition-colors">
-                  {exp}
+                  {exp.label}
                 </span>
               </label>
             ))}

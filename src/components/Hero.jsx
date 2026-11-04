@@ -107,7 +107,7 @@ const Hero = () => {
               </button>
             ))}
           </div>
-          <SearchBar onSearch={handleSearch} />
+          <SearchBar onSearch={handleSearch} activeTab={activeTab} />
         </div>
       </div>
 
