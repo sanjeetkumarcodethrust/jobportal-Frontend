@@ -254,10 +254,18 @@ const JobDetails = () => {
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-8 p-4 rounded-2xl bg-green-500/10 border border-green-500/30 text-green-500 flex items-center gap-3 font-semibold text-sm"
+            className="mb-8 p-4 rounded-2xl bg-green-500/10 border border-green-500/30 text-green-500 flex flex-col sm:flex-row sm:items-center justify-between gap-3 font-semibold text-sm"
           >
-            <CheckCircle className="w-5 h-5 shrink-0" />
-            <span>{applySuccess}</span>
+            <div className="flex items-center gap-3">
+              <CheckCircle className="w-5 h-5 shrink-0" />
+              <span>{applySuccess}</span>
+            </div>
+            <Link
+              to="/dashboard?tab=applied"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-green-500 hover:bg-green-400 text-black font-bold text-xs transition-colors shrink-0"
+            >
+              View in Applied Jobs <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
           </motion.div>
         )}
 
@@ -324,11 +332,20 @@ const JobDetails = () => {
             </div>
 
             {/* Top Right Action Button */}
-            <div className="md:shrink-0 flex flex-col gap-3">
+            <div className="md:shrink-0 flex flex-col sm:flex-row gap-3">
               {applied ? (
-                <div className="flex items-center gap-2 px-6 py-4 rounded-2xl bg-green-500/10 border border-green-500/30 text-green-500 font-bold text-base shadow-sm">
-                  <CheckCircle className="w-5 h-5" />
-                  <span>Applied</span>
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-green-500/10 border border-green-500/30 text-green-500 font-bold text-sm shadow-sm">
+                    <CheckCircle className="w-5 h-5" />
+                    <span>Applied</span>
+                  </div>
+                  <Link
+                    to="/dashboard?tab=applied"
+                    className="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-purple-600/10 hover:bg-purple-600 text-purple-400 hover:text-white border border-purple-500/20 font-bold text-sm transition-all"
+                  >
+                    View Status in Dashboard
+                    <ArrowRight className="w-4 h-4" />
+                  </Link>
                 </div>
               ) : user?.role === 'recruiter' ? (
                 <div className="px-5 py-3 rounded-2xl bg-purple-500/10 border border-purple-500/20 text-purple-400 text-xs font-bold flex items-center gap-2">

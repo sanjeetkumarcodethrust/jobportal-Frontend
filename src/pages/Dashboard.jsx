@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Briefcase,
@@ -21,16 +21,33 @@ import {
   XCircle,
   AlertCircle,
   FileText,
+  Lock,
+  X,
+  FileCheck,
 } from 'lucide-react';
 import api from '../services/api';
 
 const Dashboard = () => {
   const { user, loading } = useContext(AuthContext);
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const urlTab = searchParams.get('tab');
 
-  const [activeTab, setActiveTab] = useState(
-    user?.role === 'recruiter' ? 'listings' : 'applied'
-  );
+  const defaultTab = user?.role === 'recruiter' ? 'listings' : 'applied';
+  const [activeTab, setActiveTab] = useState(urlTab || defaultTab);
+  const [selectedApp, setSelectedApp] = useState(null);
+
+  // Sync tab with URL parameter
+  useEffect(() => {
+    if (urlTab) {
+      setActiveTab(urlTab);
+    }
+  }, [urlTab]);
+
+  const handleTabChange = (newTab) => {
+    setActiveTab(newTab);
+    setSearchParams({ tab: newTab });
+  };
 
   const [applications, setApplications] = useState([]);
   const [loadingApps, setLoadingApps] = useState(true);
@@ -236,6 +253,51 @@ const Dashboard = () => {
     );
   }
 
+  // Enforce authentication: show applied jobs & messages only when logged in
+  if (!loading && !user) {
+    return (
+      <div className="bg-[var(--color-bg)] min-h-screen pt-36 pb-20 flex items-center justify-center px-4 transition-colors duration-500">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="max-w-md w-full p-8 md:p-10 rounded-[36px] bg-[var(--color-surface)] border border-[var(--color-border)] shadow-2xl text-center space-y-6 backdrop-blur-xl"
+        >
+          <div className="w-20 h-20 rounded-3xl bg-purple-500/10 text-purple-500 flex items-center justify-center mx-auto shadow-inner">
+            <Lock className="w-10 h-10" />
+          </div>
+          <div>
+            <h2 className="text-2xl font-extrabold text-[var(--color-text-primary)] mb-2">
+              Please Sign In to Access Dashboard
+            </h2>
+            <p className="text-sm text-[var(--color-text-secondary)] leading-relaxed">
+              Your applied jobs, recruitment messages, and bookmarked listings are private and available only after signing in.
+            </p>
+          </div>
+          <div className="flex flex-col gap-3 pt-2">
+            <Link
+              to="/login?redirect=/dashboard"
+              className="w-full py-4 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white font-bold rounded-2xl shadow-xl shadow-purple-500/20 transition-all hover:scale-[1.02] text-sm"
+            >
+              Log In to Your Account
+            </Link>
+            <Link
+              to="/register"
+              className="w-full py-3.5 bg-[var(--color-bg)] border border-[var(--color-border)] hover:border-purple-500/40 text-[var(--color-text-primary)] font-semibold rounded-2xl transition-all text-sm"
+            >
+              Create a Free Account
+            </Link>
+            <Link
+              to="/jobs"
+              className="text-xs text-[var(--color-text-muted)] hover:text-purple-500 transition-colors pt-2"
+            >
+              ← Or browse all public job postings as guest
+            </Link>
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-[var(--color-bg)] min-h-screen pt-32 pb-16 transition-colors duration-500">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -282,7 +344,7 @@ const Dashboard = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.1 }}
                 whileHover={{ y: -5 }}
-                onClick={() => setActiveTab(stat.id)}
+                onClick={() => handleTabChange(stat.id)}
                 className={`bg-[var(--color-surface)] p-8 rounded-[32px] border transition-all cursor-pointer backdrop-blur-xl relative overflow-hidden group shadow-xl ${
                   isActive
                     ? `${stat.activeColor} ring-2 ring-purple-500/30 scale-[1.02]`
@@ -325,8 +387,8 @@ const Dashboard = () => {
         <div className="mb-8 flex items-center gap-3 overflow-x-auto pb-2 border-b border-[var(--color-border)]">
           {!isRecruiter && (
             <button
-              onClick={() => setActiveTab('applied')}
-              className={`px-6 py-3 rounded-2xl font-bold text-sm transition-all flex items-center gap-2 ${
+              onClick={() => handleTabChange('applied')}
+              className={`px-6 py-3 rounded-2xl font-bold text-sm transition-all flex items-center gap-2 cursor-pointer ${
                 activeTab === 'applied'
                   ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/25'
                   : 'bg-[var(--color-surface)] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] border border-[var(--color-border)]'
@@ -342,8 +404,8 @@ const Dashboard = () => {
 
           {!isRecruiter && (
             <button
-              onClick={() => setActiveTab('saved')}
-              className={`px-6 py-3 rounded-2xl font-bold text-sm transition-all flex items-center gap-2 ${
+              onClick={() => handleTabChange('saved')}
+              className={`px-6 py-3 rounded-2xl font-bold text-sm transition-all flex items-center gap-2 cursor-pointer ${
                 activeTab === 'saved'
                   ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/25'
                   : 'bg-[var(--color-surface)] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] border border-[var(--color-border)]'
@@ -359,8 +421,8 @@ const Dashboard = () => {
 
           {isRecruiter && (
             <button
-              onClick={() => setActiveTab('listings')}
-              className={`px-6 py-3 rounded-2xl font-bold text-sm transition-all flex items-center gap-2 ${
+              onClick={() => handleTabChange('listings')}
+              className={`px-6 py-3 rounded-2xl font-bold text-sm transition-all flex items-center gap-2 cursor-pointer ${
                 activeTab === 'listings'
                   ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/25'
                   : 'bg-[var(--color-surface)] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] border border-[var(--color-border)]'
@@ -376,8 +438,8 @@ const Dashboard = () => {
 
           {isRecruiter && (
             <button
-              onClick={() => setActiveTab('applicants')}
-              className={`px-6 py-3 rounded-2xl font-bold text-sm transition-all flex items-center gap-2 ${
+              onClick={() => handleTabChange('applicants')}
+              className={`px-6 py-3 rounded-2xl font-bold text-sm transition-all flex items-center gap-2 cursor-pointer ${
                 activeTab === 'applicants'
                   ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/25'
                   : 'bg-[var(--color-surface)] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] border border-[var(--color-border)]'
@@ -392,8 +454,8 @@ const Dashboard = () => {
           )}
 
           <button
-            onClick={() => setActiveTab('messages')}
-            className={`px-6 py-3 rounded-2xl font-bold text-sm transition-all flex items-center gap-2 ${
+            onClick={() => handleTabChange('messages')}
+            className={`px-6 py-3 rounded-2xl font-bold text-sm transition-all flex items-center gap-2 cursor-pointer ${
               activeTab === 'messages'
                 ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/25'
                 : 'bg-[var(--color-surface)] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] border border-[var(--color-border)]'
@@ -529,11 +591,22 @@ const Dashboard = () => {
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-3 shrink-0">
+                        <div className="flex items-center gap-2.5 shrink-0">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedApp(app);
+                            }}
+                            className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-[var(--color-bg)] hover:bg-purple-500/10 border border-[var(--color-border)] hover:border-purple-500/40 text-xs font-bold text-[var(--color-text-primary)] hover:text-purple-500 transition-all cursor-pointer"
+                          >
+                            <FileText className="w-3.5 h-3.5" />
+                            Application Details
+                          </button>
                           <Link
                             to={`/jobs/${jobId}`}
                             onClick={(e) => e.stopPropagation()}
-                            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-purple-600/10 hover:bg-purple-600 text-purple-500 hover:text-white font-bold text-xs transition-all"
+                            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-purple-600/10 hover:bg-purple-600 text-purple-500 hover:text-white font-bold text-xs transition-all"
                           >
                             View Job
                             <ArrowRight className="w-3.5 h-3.5" />
@@ -999,6 +1072,148 @@ const Dashboard = () => {
             )}
           </div>
         </motion.div>
+
+        {/* Application Details Modal */}
+        <AnimatePresence>
+          {selectedApp && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                className="w-full max-w-2xl bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[32px] p-6 md:p-8 shadow-2xl relative overflow-hidden max-h-[90vh] overflow-y-auto"
+              >
+                <div className="flex items-start justify-between pb-6 border-b border-[var(--color-border)]">
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500/15 to-purple-600/15 flex items-center justify-center text-purple-500 shrink-0">
+                      <Building className="w-7 h-7" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold text-[var(--color-text-primary)]">
+                        {selectedApp.jobId?.title || 'Job Opening'}
+                      </h3>
+                      <p className="text-sm text-[var(--color-text-secondary)] font-medium">
+                        {selectedApp.jobId?.company || 'Company'} • {selectedApp.jobId?.location || 'Remote'}
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setSelectedApp(null)}
+                    className="p-2 rounded-xl text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:bg-white/5 transition-colors cursor-pointer"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+
+                <div className="py-6 space-y-6">
+                  {/* Status Timeline */}
+                  <div>
+                    <h4 className="text-xs uppercase tracking-wider font-bold text-[var(--color-text-muted)] mb-4">
+                      Application Milestone Tracker
+                    </h4>
+                    <div className="grid grid-cols-3 gap-3 p-4 rounded-2xl bg-[var(--color-bg)] border border-[var(--color-border)] text-center">
+                      <div className="space-y-1">
+                        <div className="w-8 h-8 rounded-full bg-green-500/15 text-green-500 flex items-center justify-center mx-auto text-xs font-bold">
+                          ✓
+                        </div>
+                        <p className="text-xs font-bold text-[var(--color-text-primary)]">Submitted</p>
+                        <p className="text-[10px] text-[var(--color-text-muted)]">
+                          {selectedApp.createdAt ? new Date(selectedApp.createdAt).toLocaleDateString() : 'Recorded'}
+                        </p>
+                      </div>
+
+                      <div className="space-y-1">
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center mx-auto text-xs font-bold ${
+                          selectedApp.status === 'shortlisted'
+                            ? 'bg-green-500/15 text-green-500'
+                            : selectedApp.status === 'rejected'
+                            ? 'bg-red-500/15 text-red-500'
+                            : 'bg-blue-500/15 text-blue-500 animate-pulse'
+                        }`}>
+                          {selectedApp.status === 'shortlisted' ? '✓' : selectedApp.status === 'rejected' ? '✕' : '⏳'}
+                        </div>
+                        <p className="text-xs font-bold text-[var(--color-text-primary)]">
+                          {selectedApp.status === 'applied' ? 'In Review' : 'Reviewed'}
+                        </p>
+                        <p className="text-[10px] text-[var(--color-text-muted)]">Hiring Team</p>
+                      </div>
+
+                      <div className="space-y-1">
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center mx-auto text-xs font-bold ${
+                          selectedApp.status === 'shortlisted'
+                            ? 'bg-green-500 text-white shadow-lg shadow-green-500/30'
+                            : selectedApp.status === 'rejected'
+                            ? 'bg-red-500/20 text-red-500'
+                            : 'bg-gray-500/15 text-gray-500'
+                        }`}>
+                          {selectedApp.status === 'shortlisted' ? '★' : selectedApp.status === 'rejected' ? '✕' : '•'}
+                        </div>
+                        <p className="text-xs font-bold text-[var(--color-text-primary)] capitalize">
+                          {selectedApp.status === 'shortlisted'
+                            ? 'Shortlisted'
+                            : selectedApp.status === 'rejected'
+                            ? 'Decision Made'
+                            : 'Pending'}
+                        </p>
+                        <p className="text-[10px] text-[var(--color-text-muted)]">Outcome</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Submission Details */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="p-4 rounded-2xl bg-[var(--color-bg)] border border-[var(--color-border)]">
+                      <p className="text-xs text-[var(--color-text-muted)] font-semibold mb-1">Application Reference</p>
+                      <p className="text-xs font-mono font-bold text-[var(--color-text-primary)] truncate">
+                        {selectedApp._id}
+                      </p>
+                    </div>
+
+                    <div className="p-4 rounded-2xl bg-[var(--color-bg)] border border-[var(--color-border)]">
+                      <p className="text-xs text-[var(--color-text-muted)] font-semibold mb-1">Current Status</p>
+                      <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold capitalize ${
+                        selectedApp.status === 'shortlisted'
+                          ? 'bg-green-500/10 text-green-500 border border-green-500/20'
+                          : selectedApp.status === 'rejected'
+                          ? 'bg-red-500/10 text-red-500 border border-red-500/20'
+                          : 'bg-blue-500/10 text-blue-500 border border-blue-500/20'
+                      }`}>
+                        {selectedApp.status || 'Applied (Under Review)'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Resume Info */}
+                  <div className="p-4 rounded-2xl bg-[var(--color-bg)] border border-[var(--color-border)]">
+                    <p className="text-xs text-[var(--color-text-muted)] font-semibold mb-1.5 flex items-center gap-1.5">
+                      <FileCheck className="w-3.5 h-3.5 text-purple-500" /> Submitted Resume / Profile Link
+                    </p>
+                    <p className="text-sm font-medium text-[var(--color-text-primary)] break-all bg-[var(--color-surface)] p-3 rounded-xl border border-[var(--color-border)]">
+                      {selectedApp.resume || 'Profile resume linked at time of application'}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Footer Actions */}
+                <div className="pt-6 border-t border-[var(--color-border)] flex items-center justify-between gap-4">
+                  <button
+                    onClick={() => setSelectedApp(null)}
+                    className="px-5 py-2.5 rounded-xl border border-[var(--color-border)] text-xs font-bold text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors cursor-pointer"
+                  >
+                    Close
+                  </button>
+                  <Link
+                    to={`/jobs/${selectedApp.jobId?._id || selectedApp.jobId}`}
+                    className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs shadow-lg transition-all"
+                  >
+                    View Original Job Posting
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </Link>
+                </div>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );
