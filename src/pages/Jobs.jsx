@@ -16,6 +16,7 @@ const Jobs = () => {
 
   // Parse initial values from URL
   const searchParams = new URLSearchParams(location.search);
+  const companyQuery = searchParams.get('company') || '';
   const initialValues = {
     skills: searchParams.get('skills') || searchParams.get('search') || '',
     experience: searchParams.get('experience') || '',
@@ -51,6 +52,16 @@ const Jobs = () => {
     navigate(`/jobs?${params.toString()}`);
   };
 
+  const handleRemoveFilter = (paramKey) => {
+    const params = new URLSearchParams(location.search);
+    params.delete(paramKey);
+    if (paramKey === 'skills') {
+      params.delete('search');
+    }
+    const queryString = params.toString();
+    navigate(queryString ? `/jobs?${queryString}` : '/jobs');
+  };
+
   const handleResetFilters = () => {
     navigate('/jobs');
   };
@@ -74,6 +85,7 @@ const Jobs = () => {
   }, [location.search]);
 
   const hasActiveFilters = Boolean(
+    companyQuery ||
     initialValues.skills ||
     initialValues.experience ||
     initialValues.location ||
@@ -98,10 +110,20 @@ const Jobs = () => {
             className="text-center mb-12"
           >
             <h1 className="text-4xl md:text-6xl font-extrabold text-[var(--color-text-primary)] tracking-tight mb-4">
-              Find your <span className="bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">dream job</span>
+              {companyQuery ? (
+                <>
+                  Open Positions at <span className="bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">{companyQuery}</span>
+                </>
+              ) : (
+                <>
+                  Find your <span className="bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">dream job</span>
+                </>
+              )}
             </h1>
             <p className="text-lg text-[var(--color-text-secondary)] max-w-2xl mx-auto mb-10">
-              Explore thousands of job opportunities and take the next step in your career.
+              {companyQuery 
+                ? `Explore verified career opportunities and high-impact open roles currently hiring at ${companyQuery}.`
+                : "Explore thousands of job opportunities and take the next step in your career."}
             </p>
             <SearchBar onSearch={handleSearch} initialValues={initialValues} />
           </motion.div>
@@ -130,14 +152,83 @@ const Jobs = () => {
                   {loading ? 'Searching jobs...' : `${jobs.length} Jobs Found`}
                 </h2>
                 {hasActiveFilters && !loading && (
-                  <p className="text-xs text-[var(--color-text-secondary)] mt-1">
-                    Matching criteria: {[
-                      initialValues.skills && `Role: "${initialValues.skills}"`,
-                      initialValues.experience && `Exp: ${initialValues.experience}`,
-                      initialValues.location && `Location: "${initialValues.location}"`,
-                      searchParams.get('jobType') && `Type: ${searchParams.get('jobType')}`,
-                    ].filter(Boolean).join(' • ')}
-                  </p>
+                  <div className="flex flex-wrap items-center gap-2 mt-2">
+                    <span className="text-xs text-[var(--color-text-muted)] font-medium">Active:</span>
+                    {companyQuery && (
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20">
+                        <Building className="w-3.5 h-3.5" />
+                        Company: {companyQuery}
+                        <button
+                          onClick={() => handleRemoveFilter('company')}
+                          className="hover:text-red-500 transition-colors ml-1 font-bold text-sm cursor-pointer"
+                          title="Clear company filter"
+                        >
+                          ×
+                        </button>
+                      </span>
+                    )}
+                    {initialValues.skills && (
+                      <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
+                        Role: {initialValues.skills}
+                        <button
+                          onClick={() => handleRemoveFilter('skills')}
+                          className="hover:text-red-500 transition-colors ml-1 font-bold text-sm cursor-pointer"
+                          title="Clear skill filter"
+                        >
+                          ×
+                        </button>
+                      </span>
+                    )}
+                    {initialValues.experience && (
+                      <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                        Exp: {initialValues.experience}
+                        <button
+                          onClick={() => handleRemoveFilter('experience')}
+                          className="hover:text-red-500 transition-colors ml-1 font-bold text-sm cursor-pointer"
+                          title="Clear experience filter"
+                        >
+                          ×
+                        </button>
+                      </span>
+                    )}
+                    {initialValues.location && (
+                      <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                        <MapPin className="w-3.5 h-3.5" />
+                        {initialValues.location}
+                        <button
+                          onClick={() => handleRemoveFilter('location')}
+                          className="hover:text-red-500 transition-colors ml-1 font-bold text-sm cursor-pointer"
+                          title="Clear location filter"
+                        >
+                          ×
+                        </button>
+                      </span>
+                    )}
+                    {searchParams.get('jobType') && (
+                      <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">
+                        Type: {searchParams.get('jobType')}
+                        <button
+                          onClick={() => handleRemoveFilter('jobType')}
+                          className="hover:text-red-500 transition-colors ml-1 font-bold text-sm cursor-pointer"
+                          title="Clear job type filter"
+                        >
+                          ×
+                        </button>
+                      </span>
+                    )}
+                    {searchParams.get('category') && (
+                      <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20">
+                        Cat: {searchParams.get('category')}
+                        <button
+                          onClick={() => handleRemoveFilter('category')}
+                          className="hover:text-red-500 transition-colors ml-1 font-bold text-sm cursor-pointer"
+                          title="Clear category filter"
+                        >
+                          ×
+                        </button>
+                      </span>
+                    )}
+                  </div>
                 )}
               </div>
 
