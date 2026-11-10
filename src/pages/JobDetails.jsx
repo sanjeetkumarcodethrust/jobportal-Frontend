@@ -17,6 +17,13 @@ import {
   AlertCircle,
   UserCheck,
   ExternalLink,
+  User,
+  Mail,
+  Phone,
+  FileText,
+  MessageSquare,
+  X,
+  Sparkles,
 } from 'lucide-react';
 import api from '../services/api';
 import { AuthContext } from '../context/AuthContext';
@@ -36,9 +43,31 @@ const JobDetails = () => {
   const [applySuccess, setApplySuccess] = useState('');
   const [applyError, setApplyError] = useState('');
   const [showApplyModal, setShowApplyModal] = useState(false);
-  const [resumeInput, setResumeInput] = useState('');
   const [copied, setCopied] = useState(false);
   const [saved, setSaved] = useState(false);
+
+  // Complete applicant details
+  const [formData, setFormData] = useState({
+    fullName: '',
+    email: '',
+    phone: '',
+    address: '',
+    resume: '',
+    coverNote: '',
+  });
+
+  useEffect(() => {
+    if (user) {
+      setFormData((prev) => ({
+        fullName: prev.fullName || user.name || '',
+        email: prev.email || user.email || '',
+        phone: prev.phone || user.phone || '',
+        address: prev.address || user.address || (user.jobPreferences?.locations?.[0] || ''),
+        resume: prev.resume || user.resume || '',
+        coverNote: prev.coverNote || '',
+      }));
+    }
+  }, [user]);
 
   useEffect(() => {
     const fetchJobAndApplication = async () => {
@@ -56,11 +85,6 @@ const JobDetails = () => {
           setSaved(isSaved);
         } catch {
           // Ignore
-        }
-
-        // Pre-fill resume input if user has one
-        if (user?.resume) {
-          setResumeInput(user.resume);
         }
 
         // Check if user has already applied
@@ -104,23 +128,50 @@ const JobDetails = () => {
       return;
     }
 
+    if (!formData.fullName.trim()) {
+      setApplyError('Please enter your full name.');
+      return;
+    }
+    if (!formData.email.trim()) {
+      setApplyError('Please enter your email address.');
+      return;
+    }
+    if (!formData.phone.trim()) {
+      setApplyError('Please enter your mobile phone number.');
+      return;
+    }
+    if (!formData.address.trim()) {
+      setApplyError('Please enter your address or current city.');
+      return;
+    }
+    if (!formData.resume.trim()) {
+      setApplyError('Please provide a resume URL or link (Google Drive, Dropbox, PDF).');
+      return;
+    }
+
     setApplying(true);
     setApplyError('');
     setApplySuccess('');
 
     try {
-      const resumeToSend = resumeInput.trim() || user?.resume;
-      await api.post(`/apply/${id}`, { resume: resumeToSend });
+      await api.post(`/apply/${id}`, {
+        fullName: formData.fullName.trim(),
+        email: formData.email.trim(),
+        phone: formData.phone.trim(),
+        address: formData.address.trim(),
+        resume: formData.resume.trim(),
+        coverNote: formData.coverNote.trim(),
+      });
 
       setApplied(true);
-      setApplySuccess('Application submitted successfully! You can track its status in your Dashboard.');
+      setApplySuccess('Application submitted successfully! Your full details have been sent to the employer.');
       setShowApplyModal(false);
     } catch (err) {
       console.error('Application failed:', err);
       const errMsg =
         err.response?.data?.message ||
         err.message ||
-        'Failed to submit application. Please provide a resume link.';
+        'Failed to submit application. Please check your details and try again.';
       setApplyError(errMsg);
       if (errMsg.toLowerCase().includes('already applied')) {
         setApplied(true);
@@ -527,47 +578,165 @@ const JobDetails = () => {
       {/* Apply Modal */}
       <AnimatePresence>
         {showApplyModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center px-4 bg-black/60 backdrop-blur-sm">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm overflow-y-auto">
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[32px] p-8 max-w-lg w-full shadow-2xl relative"
+              className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[32px] p-6 sm:p-8 max-w-xl w-full shadow-2xl relative max-h-[90vh] overflow-y-auto"
             >
-              <h3 className="text-2xl font-bold text-[var(--color-text-primary)] mb-2">
-                Apply to {job.company}
-              </h3>
-              <p className="text-sm text-[var(--color-text-secondary)] mb-6">
-                Role: <span className="font-semibold text-purple-500">{job.title}</span>
-              </p>
+              {/* Modal Header */}
+              <div className="flex items-start justify-between pb-4 border-b border-[var(--color-border)] mb-6">
+                <div>
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-purple-500/10 text-purple-500 mb-2">
+                    <Sparkles className="w-3.5 h-3.5" />
+                    Direct Application
+                  </div>
+                  <h3 className="text-2xl font-extrabold text-[var(--color-text-primary)]">
+                    Apply to {job.company}
+                  </h3>
+                  <p className="text-xs text-[var(--color-text-secondary)] mt-0.5">
+                    Position: <span className="font-bold text-purple-500">{job.title}</span> • {job.location || 'Remote'}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowApplyModal(false);
+                    setApplyError('');
+                  }}
+                  className="p-2 rounded-xl text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:bg-white/5 transition-colors cursor-pointer"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
 
               {applyError && (
-                <div className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-xs font-semibold flex items-center gap-2">
+                <div className="mb-6 p-3.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-xs font-semibold flex items-center gap-2">
                   <AlertCircle className="w-4 h-4 shrink-0" />
                   <span>{applyError}</span>
                 </div>
               )}
 
               <form onSubmit={handleApply} className="space-y-5">
+                {/* 1. Candidate Personal Details */}
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-[var(--color-text-secondary)] mb-2">
-                    Resume Link / URL or File Path
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={resumeInput}
-                    onChange={(e) => setResumeInput(e.target.value)}
-                    placeholder="https://drive.google.com/... or uploaded resume"
-                    className="w-full px-4 py-3 rounded-xl bg-[var(--color-bg)] border border-[var(--color-border)] text-sm text-[var(--color-text-primary)] focus:outline-none focus:border-purple-500 transition-colors"
-                  />
-                  <p className="text-xs text-[var(--color-text-muted)] mt-1.5">
-                    {user?.resume
-                      ? 'Loaded from your profile resume. You can update or replace it here.'
-                      : 'Provide a link to your Google Drive, Dropbox, portfolio, or PDF resume.'}
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-3 flex items-center gap-1.5">
+                    <User className="w-3.5 h-3.5 text-purple-500" />
+                    Applicant Contact Details
+                  </h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-[var(--color-text-secondary)] mb-1.5">
+                        Full Name <span className="text-red-500">*</span>
+                      </label>
+                      <div className="relative">
+                        <User className="w-4 h-4 text-[var(--color-text-muted)] absolute left-3.5 top-1/2 -translate-y-1/2" />
+                        <input
+                          type="text"
+                          required
+                          value={formData.fullName}
+                          onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                          placeholder="e.g. John Doe"
+                          className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-[var(--color-bg)] border border-[var(--color-border)] text-sm text-[var(--color-text-primary)] focus:outline-none focus:border-purple-500 transition-colors"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-[var(--color-text-secondary)] mb-1.5">
+                        Email Address <span className="text-red-500">*</span>
+                      </label>
+                      <div className="relative">
+                        <Mail className="w-4 h-4 text-[var(--color-text-muted)] absolute left-3.5 top-1/2 -translate-y-1/2" />
+                        <input
+                          type="email"
+                          required
+                          value={formData.email}
+                          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                          placeholder="e.g. candidate@example.com"
+                          className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-[var(--color-bg)] border border-[var(--color-border)] text-sm text-[var(--color-text-primary)] focus:outline-none focus:border-purple-500 transition-colors"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-[var(--color-text-secondary)] mb-1.5">
+                        Mobile Number <span className="text-red-500">*</span>
+                      </label>
+                      <div className="relative">
+                        <Phone className="w-4 h-4 text-[var(--color-text-muted)] absolute left-3.5 top-1/2 -translate-y-1/2" />
+                        <input
+                          type="tel"
+                          required
+                          value={formData.phone}
+                          onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                          placeholder="e.g. +91 98765 43210"
+                          className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-[var(--color-bg)] border border-[var(--color-border)] text-sm text-[var(--color-text-primary)] focus:outline-none focus:border-purple-500 transition-colors"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-[var(--color-text-secondary)] mb-1.5">
+                        Address / City <span className="text-red-500">*</span>
+                      </label>
+                      <div className="relative">
+                        <MapPin className="w-4 h-4 text-[var(--color-text-muted)] absolute left-3.5 top-1/2 -translate-y-1/2" />
+                        <input
+                          type="text"
+                          required
+                          value={formData.address}
+                          onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                          placeholder="e.g. Mumbai, Maharashtra"
+                          className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-[var(--color-bg)] border border-[var(--color-border)] text-sm text-[var(--color-text-primary)] focus:outline-none focus:border-purple-500 transition-colors"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 2. Resume Submission */}
+                <div className="pt-2 border-t border-[var(--color-border)]">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-3 flex items-center gap-1.5">
+                    <FileText className="w-3.5 h-3.5 text-purple-500" />
+                    Resume / Portfolio Link <span className="text-red-500">*</span>
+                  </h4>
+                  <div className="relative">
+                    <FileText className="w-4 h-4 text-[var(--color-text-muted)] absolute left-3.5 top-3" />
+                    <input
+                      type="text"
+                      required
+                      value={formData.resume}
+                      onChange={(e) => setFormData({ ...formData, resume: e.target.value })}
+                      placeholder="https://drive.google.com/... or uploaded resume link"
+                      className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-[var(--color-bg)] border border-[var(--color-border)] text-sm text-[var(--color-text-primary)] focus:outline-none focus:border-purple-500 transition-colors"
+                    />
+                  </div>
+                  <p className="text-[11px] text-[var(--color-text-muted)] mt-1.5">
+                    Share a Google Drive, Dropbox, Notion, or personal portfolio URL accessible to the employer.
                   </p>
                 </div>
 
+                {/* 3. Cover Note / Message to Recruiter */}
+                <div className="pt-2 border-t border-[var(--color-border)]">
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] flex items-center gap-1.5">
+                      <MessageSquare className="w-3.5 h-3.5 text-purple-500" />
+                      Cover Note / Pitch (Optional)
+                    </label>
+                    <span className="text-[10px] text-[var(--color-text-muted)]">Optional</span>
+                  </div>
+                  <textarea
+                    rows="3"
+                    value={formData.coverNote}
+                    onChange={(e) => setFormData({ ...formData, coverNote: e.target.value })}
+                    placeholder="Briefly describe your experience, relevant achievements, or why you are excited for this role..."
+                    className="w-full px-4 py-2.5 rounded-xl bg-[var(--color-bg)] border border-[var(--color-border)] text-sm text-[var(--color-text-primary)] focus:outline-none focus:border-purple-500 transition-colors resize-none"
+                  />
+                </div>
+
+                {/* Action Buttons */}
                 <div className="flex items-center justify-end gap-3 pt-4 border-t border-[var(--color-border)]">
                   <button
                     type="button"
@@ -575,24 +744,24 @@ const JobDetails = () => {
                       setShowApplyModal(false);
                       setApplyError('');
                     }}
-                    className="px-5 py-2.5 rounded-xl border border-[var(--color-border)] text-sm font-bold text-[var(--color-text-secondary)] hover:bg-[var(--color-bg)] transition-colors"
+                    className="px-5 py-2.5 rounded-xl border border-[var(--color-border)] text-xs font-bold text-[var(--color-text-secondary)] hover:bg-[var(--color-bg)] transition-colors cursor-pointer"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={applying}
-                    className="px-6 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-white text-sm font-bold shadow-lg transition-all flex items-center gap-2"
+                    className="px-6 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-white text-xs font-bold shadow-lg shadow-purple-500/25 transition-all flex items-center gap-2 cursor-pointer"
                   >
                     {applying ? (
                       <>
                         <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        Submitting...
+                        Submitting Application...
                       </>
                     ) : (
                       <>
-                        <Send className="w-4 h-4" />
-                        Confirm & Apply
+                        <Send className="w-3.5 h-3.5" />
+                        Confirm & Submit Application
                       </>
                     )}
                   </button>

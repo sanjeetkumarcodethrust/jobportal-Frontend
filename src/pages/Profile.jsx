@@ -2,7 +2,7 @@ import { useState, useEffect, useContext } from 'react';
 import { motion } from 'framer-motion';
 import api from '../services/api';
 import { AuthContext } from '../context/AuthContext';
-import { User as UserIcon, Settings, Briefcase, GraduationCap, Award, Heart, UploadCloud, Link as LinkIcon, DollarSign, MapPin } from 'lucide-react';
+import { User as UserIcon, Settings, Briefcase, GraduationCap, Award, Heart, UploadCloud, Link as LinkIcon, DollarSign, MapPin, Phone } from 'lucide-react';
 
 const Profile = () => {
   const { user, getProfile } = useContext(AuthContext);
@@ -12,6 +12,8 @@ const Profile = () => {
   
   const [formData, setFormData] = useState({
     name: '',
+    phone: '',
+    address: '',
     profilePicture: '',
     summary: '',
     about: '',
@@ -32,6 +34,8 @@ const Profile = () => {
     if (user) {
       setFormData({
         name: user.name || '',
+        phone: user.phone || '',
+        address: user.address || (user.jobPreferences?.locations?.[0] || ''),
         profilePicture: user.profilePicture || '',
         summary: user.summary || '',
         about: user.about || '',
@@ -160,6 +164,18 @@ const Profile = () => {
                 <div>
                   <label className="block text-sm font-semibold text-[var(--color-text-secondary)] mb-2">Profile Picture URL</label>
                   <input type="text" name="profilePicture" value={formData.profilePicture} onChange={handleChange} className="w-full bg-[var(--color-bg)] border border-[var(--color-border)] rounded-xl px-4 py-3 text-[var(--color-text-primary)] focus:outline-none focus:ring-2 focus:ring-purple-500 transition-shadow" placeholder="https://..." />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-[var(--color-text-secondary)] mb-2 flex items-center gap-1.5">
+                    <Phone className="w-4 h-4 text-purple-500" /> Mobile / Contact Number
+                  </label>
+                  <input type="tel" name="phone" value={formData.phone} onChange={handleChange} className="w-full bg-[var(--color-bg)] border border-[var(--color-border)] rounded-xl px-4 py-3 text-[var(--color-text-primary)] focus:outline-none focus:ring-2 focus:ring-purple-500 transition-shadow" placeholder="+91 98765 43210" />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-[var(--color-text-secondary)] mb-2 flex items-center gap-1.5">
+                    <MapPin className="w-4 h-4 text-purple-500" /> Current Address / Location
+                  </label>
+                  <input type="text" name="address" value={formData.address} onChange={handleChange} className="w-full bg-[var(--color-bg)] border border-[var(--color-border)] rounded-xl px-4 py-3 text-[var(--color-text-primary)] focus:outline-none focus:ring-2 focus:ring-purple-500 transition-shadow" placeholder="e.g. Mumbai, Maharashtra" />
                 </div>
                 <div className="md:col-span-2">
                   <label className="block text-sm font-semibold text-[var(--color-text-secondary)] mb-2">Professional Summary</label>

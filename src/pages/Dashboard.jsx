@@ -24,6 +24,9 @@ import {
   Lock,
   X,
   FileCheck,
+  User,
+  Mail,
+  Phone,
 } from 'lucide-react';
 import api from '../services/api';
 
@@ -939,37 +942,74 @@ const Dashboard = () => {
                   {applications.map((app) => {
                     const candidate = app.candidateId || {};
                     const job = app.jobId || {};
+                    const applicantName = app.fullName || candidate.name || 'Candidate';
+                    const applicantEmail = app.email || candidate.email || 'N/A';
+                    const applicantPhone = app.phone || candidate.phone || '';
+                    const applicantAddress = app.address || candidate.address || '';
+
                     return (
                       <div
                         key={app._id}
-                        className="p-6 rounded-[28px] bg-[var(--color-surface)] border border-[var(--color-border)] shadow-md flex flex-col md:flex-row md:items-center justify-between gap-5"
+                        className="p-6 rounded-[28px] bg-[var(--color-surface)] border border-[var(--color-border)] shadow-md flex flex-col lg:flex-row lg:items-center justify-between gap-5"
                       >
-                        <div className="flex items-start gap-4">
-                          <div className="w-12 h-12 rounded-2xl bg-purple-500/10 flex items-center justify-center text-purple-500 shrink-0 font-extrabold">
-                            {candidate.name ? candidate.name[0] : 'C'}
+                        <div className="flex items-start gap-4 flex-1">
+                          <div className="w-12 h-12 rounded-2xl bg-purple-500/10 flex items-center justify-center text-purple-500 shrink-0 font-extrabold text-base">
+                            {applicantName ? applicantName[0].toUpperCase() : 'C'}
                           </div>
-                          <div>
-                            <h4 className="text-base font-bold text-[var(--color-text-primary)]">
-                              {candidate.name || 'Candidate'}
-                            </h4>
-                            <p className="text-xs text-[var(--color-text-secondary)]">
-                              Applied for:{' '}
-                              <span className="font-bold text-purple-400">
+                          <div className="space-y-1.5 flex-1 min-w-0">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <h4 className="text-base font-bold text-[var(--color-text-primary)]">
+                                {applicantName}
+                              </h4>
+                              <span className="text-xs px-2.5 py-0.5 rounded-full bg-purple-500/10 text-purple-400 font-semibold">
                                 {job.title || 'Role'}
-                              </span>{' '}
-                              • {candidate.email}
-                            </p>
-                            {app.resume && (
-                              <p className="text-xs text-blue-400 mt-1 flex items-center gap-1">
-                                <FileText className="w-3.5 h-3.5" />
-                                Resume: {app.resume}
+                              </span>
+                            </div>
+
+                            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-[var(--color-text-secondary)]">
+                              <span className="flex items-center gap-1">
+                                <Mail className="w-3.5 h-3.5 text-purple-500" />
+                                {applicantEmail}
+                              </span>
+                              {applicantPhone && (
+                                <span className="flex items-center gap-1 font-medium text-[var(--color-text-primary)]">
+                                  <Phone className="w-3.5 h-3.5 text-green-500" />
+                                  {applicantPhone}
+                                </span>
+                              )}
+                              {applicantAddress && (
+                                <span className="flex items-center gap-1">
+                                  <MapPin className="w-3.5 h-3.5 text-purple-500" />
+                                  {applicantAddress}
+                                </span>
+                              )}
+                            </div>
+
+                            {app.coverNote && (
+                              <p className="text-xs text-[var(--color-text-secondary)] italic bg-[var(--color-bg)] p-2.5 rounded-xl border border-[var(--color-border)] mt-2">
+                                "{app.coverNote}"
                               </p>
+                            )}
+
+                            {app.resume && (
+                              <div className="pt-1 flex items-center gap-2">
+                                <a
+                                  href={app.resume.startsWith('http') ? app.resume : `https://${app.resume}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-500 hover:text-blue-400 transition-colors"
+                                >
+                                  <FileText className="w-3.5 h-3.5" />
+                                  View Resume / Portfolio
+                                  <ExternalLink className="w-3 h-3" />
+                                </a>
+                              </div>
                             )}
                           </div>
                         </div>
 
                         {/* Recruiter decision controls */}
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-3 shrink-0">
                           <select
                             value={app.status || 'applied'}
                             onChange={(e) => handleStatusUpdate(app._id, e.target.value)}
@@ -1160,6 +1200,51 @@ const Dashboard = () => {
                     </div>
                   </div>
 
+                  {/* Candidate Contact Details Submitted */}
+                  <div>
+                    <h4 className="text-xs uppercase tracking-wider font-bold text-[var(--color-text-muted)] mb-3 flex items-center gap-1.5">
+                      <User className="w-3.5 h-3.5 text-purple-500" />
+                      Candidate Contact Information
+                    </h4>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-4 rounded-2xl bg-[var(--color-bg)] border border-[var(--color-border)] text-xs">
+                      <div>
+                        <span className="text-[var(--color-text-muted)] block font-semibold mb-0.5">Full Name</span>
+                        <span className="font-bold text-[var(--color-text-primary)]">
+                          {selectedApp.fullName || user?.name || 'Applicant'}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-[var(--color-text-muted)] block font-semibold mb-0.5">Email Address</span>
+                        <span className="font-bold text-[var(--color-text-primary)]">
+                          {selectedApp.email || user?.email || 'N/A'}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-[var(--color-text-muted)] block font-semibold mb-0.5">Mobile Number</span>
+                        <span className="font-bold text-[var(--color-text-primary)]">
+                          {selectedApp.phone || user?.phone || 'Not provided'}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-[var(--color-text-muted)] block font-semibold mb-0.5">Current Address / Location</span>
+                        <span className="font-bold text-[var(--color-text-primary)]">
+                          {selectedApp.address || user?.address || 'Not provided'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {selectedApp.coverNote && (
+                    <div className="p-4 rounded-2xl bg-[var(--color-bg)] border border-[var(--color-border)]">
+                      <p className="text-xs text-[var(--color-text-muted)] font-semibold mb-1 flex items-center gap-1.5">
+                        <MessageSquare className="w-3.5 h-3.5 text-purple-500" /> Submitted Cover Note
+                      </p>
+                      <p className="text-xs text-[var(--color-text-secondary)] italic leading-relaxed">
+                        "{selectedApp.coverNote}"
+                      </p>
+                    </div>
+                  )}
+
                   {/* Submission Details */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="p-4 rounded-2xl bg-[var(--color-bg)] border border-[var(--color-border)]">
@@ -1184,13 +1269,26 @@ const Dashboard = () => {
                   </div>
 
                   {/* Resume Info */}
-                  <div className="p-4 rounded-2xl bg-[var(--color-bg)] border border-[var(--color-border)]">
-                    <p className="text-xs text-[var(--color-text-muted)] font-semibold mb-1.5 flex items-center gap-1.5">
-                      <FileCheck className="w-3.5 h-3.5 text-purple-500" /> Submitted Resume / Profile Link
-                    </p>
-                    <p className="text-sm font-medium text-[var(--color-text-primary)] break-all bg-[var(--color-surface)] p-3 rounded-xl border border-[var(--color-border)]">
-                      {selectedApp.resume || 'Profile resume linked at time of application'}
-                    </p>
+                  <div className="p-4 rounded-2xl bg-[var(--color-bg)] border border-[var(--color-border)] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="text-xs text-[var(--color-text-muted)] font-semibold mb-1 flex items-center gap-1.5">
+                        <FileCheck className="w-3.5 h-3.5 text-purple-500" /> Submitted Resume / Portfolio Link
+                      </p>
+                      <p className="text-xs font-mono font-medium text-[var(--color-text-primary)] truncate max-w-sm">
+                        {selectedApp.resume || 'Profile resume linked at time of application'}
+                      </p>
+                    </div>
+                    {selectedApp.resume && (
+                      <a
+                        href={selectedApp.resume.startsWith('http') ? selectedApp.resume : `https://${selectedApp.resume}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-purple-600/10 hover:bg-purple-600 text-purple-500 hover:text-white font-bold text-xs transition-all shrink-0 cursor-pointer"
+                      >
+                        Open Resume
+                        <ExternalLink className="w-3.5 h-3.5" />
+                      </a>
+                    )}
                   </div>
                 </div>
 
