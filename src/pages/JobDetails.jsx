@@ -10,6 +10,7 @@ import {
   GraduationCap,
   Tag,
   ArrowLeft,
+  ArrowRight,
   CheckCircle,
   Share2,
   Bookmark,
