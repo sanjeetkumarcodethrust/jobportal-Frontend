@@ -24,6 +24,7 @@ import {
   MessageSquare,
   X,
   Sparkles,
+  CheckCircle2,
 } from 'lucide-react';
 import api from '../services/api';
 import { AuthContext } from '../context/AuthContext';
@@ -43,6 +44,7 @@ const JobDetails = () => {
   const [applySuccess, setApplySuccess] = useState('');
   const [applyError, setApplyError] = useState('');
   const [showApplyModal, setShowApplyModal] = useState(false);
+  const [modalStep, setModalStep] = useState('form'); // 'form' | 'success'
   const [copied, setCopied] = useState(false);
   const [saved, setSaved] = useState(false);
 
@@ -138,6 +140,16 @@ const JobDetails = () => {
     }
   }, [id, user]);
 
+  const openApplyModal = () => {
+    if (!user) {
+      navigate('/login', { state: { from: `/jobs/${id}` } });
+      return;
+    }
+    setModalStep(applied ? 'success' : 'form');
+    setApplyError('');
+    setShowApplyModal(true);
+  };
+
   const handleApply = async (e) => {
     e?.preventDefault();
     if (!user) {
@@ -147,27 +159,33 @@ const JobDetails = () => {
 
     if (user.role === 'recruiter') {
       setApplyError('Recruiter accounts cannot apply for jobs. Please log in as a candidate.');
+      if (modalScrollRef.current) modalScrollRef.current.scrollTop = 0;
       return;
     }
 
     if (!formData.fullName.trim()) {
       setApplyError('Please enter your full name.');
+      if (modalScrollRef.current) modalScrollRef.current.scrollTop = 0;
       return;
     }
     if (!formData.email.trim()) {
       setApplyError('Please enter your email address.');
+      if (modalScrollRef.current) modalScrollRef.current.scrollTop = 0;
       return;
     }
     if (!formData.phone.trim()) {
       setApplyError('Please enter your mobile phone number.');
+      if (modalScrollRef.current) modalScrollRef.current.scrollTop = 0;
       return;
     }
     if (!formData.address.trim()) {
       setApplyError('Please enter your address or current city.');
+      if (modalScrollRef.current) modalScrollRef.current.scrollTop = 0;
       return;
     }
     if (!formData.resume.trim()) {
       setApplyError('Please provide a resume URL or link (Google Drive, Dropbox, PDF).');
+      if (modalScrollRef.current) modalScrollRef.current.scrollTop = 0;
       return;
     }
 
@@ -187,7 +205,7 @@ const JobDetails = () => {
 
       setApplied(true);
       setApplySuccess('Application submitted successfully! Your full details have been sent to the employer.');
-      setShowApplyModal(false);
+      setModalStep('success');
     } catch (err) {
       console.error('Application failed:', err);
       const errMsg =
@@ -197,6 +215,9 @@ const JobDetails = () => {
       setApplyError(errMsg);
       if (errMsg.toLowerCase().includes('already applied')) {
         setApplied(true);
+        setModalStep('success');
+      } else {
+        if (modalScrollRef.current) modalScrollRef.current.scrollTop = 0;
       }
     } finally {
       setApplying(false);
@@ -427,8 +448,8 @@ const JobDetails = () => {
                 </div>
               ) : (
                 <button
-                  onClick={() => setShowApplyModal(true)}
-                  className="px-8 py-4 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-extrabold text-base shadow-xl hover:shadow-purple-500/25 transition-all hover:scale-[1.02] flex items-center justify-center gap-2"
+                  onClick={openApplyModal}
+                  className="px-8 py-4 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-extrabold text-base shadow-xl hover:shadow-purple-500/25 transition-all hover:scale-[1.02] flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <Send className="w-4 h-4" />
                   Apply for this Role
@@ -549,8 +570,8 @@ const JobDetails = () => {
                 </div>
               ) : (
                 <button
-                  onClick={() => setShowApplyModal(true)}
-                  className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-extrabold text-base shadow-lg hover:shadow-purple-500/25 transition-all hover:scale-[1.01] flex items-center justify-center gap-2"
+                  onClick={openApplyModal}
+                  className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-extrabold text-base shadow-lg hover:shadow-purple-500/25 transition-all hover:scale-[1.01] flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <Send className="w-4 h-4" />
                   {user ? 'Apply Now' : 'Sign In to Apply'}
@@ -617,194 +638,277 @@ const JobDetails = () => {
               className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[28px] sm:rounded-[32px] max-w-xl w-full shadow-2xl relative flex flex-col max-h-[92vh] overflow-hidden"
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Fixed Modal Header - Always in view */}
-              <div className="p-5 sm:p-6 pb-4 border-b border-[var(--color-border)] flex items-start justify-between gap-4 shrink-0 bg-[var(--color-surface)]">
-                <div>
-                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-purple-500/10 text-purple-500 mb-1.5">
-                    <Sparkles className="w-3 h-3" />
-                    Direct Application
-                  </div>
-                  <h3 className="text-xl sm:text-2xl font-extrabold text-[var(--color-text-primary)] leading-tight">
-                    Apply to {job.company}
-                  </h3>
-                  <p className="text-xs text-[var(--color-text-secondary)] mt-0.5">
-                    Role: <span className="font-bold text-purple-500">{job.title}</span> • {job.location || 'Remote'}
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowApplyModal(false);
-                    setApplyError('');
-                  }}
-                  className="p-2 rounded-xl text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:bg-white/10 transition-colors cursor-pointer shrink-0"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-
-              {/* Scrollable Form Body - ALWAYS resets to top on open */}
-              <div
-                ref={modalScrollRef}
-                className="p-5 sm:p-6 overflow-y-auto flex-1 space-y-4"
-              >
-                {applyError && (
-                  <div className="p-3.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-xs font-semibold flex items-center gap-2">
-                    <AlertCircle className="w-4 h-4 shrink-0" />
-                    <span>{applyError}</span>
-                  </div>
-                )}
-
-                {/* Candidate Personal Details */}
-                <div>
-                  <h4 className="text-[11px] font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-2.5 flex items-center gap-1.5">
-                    <User className="w-3.5 h-3.5 text-purple-500" />
-                    Applicant Contact Details
-                  </h4>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                    <div>
-                      <label className="block text-xs font-bold text-[var(--color-text-secondary)] mb-1">
-                        Full Name <span className="text-red-500">*</span>
-                      </label>
-                      <div className="relative">
-                        <User className="w-4 h-4 text-[var(--color-text-muted)] absolute left-3 top-1/2 -translate-y-1/2" />
-                        <input
-                          type="text"
-                          required
-                          value={formData.fullName}
-                          onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                          placeholder="e.g. John Doe"
-                          className="w-full pl-9 pr-3 py-2 rounded-xl bg-[var(--color-bg)] border border-[var(--color-border)] text-sm text-[var(--color-text-primary)] focus:outline-none focus:border-purple-500 transition-colors"
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold text-[var(--color-text-secondary)] mb-1">
-                        Email Address <span className="text-red-500">*</span>
-                      </label>
-                      <div className="relative">
-                        <Mail className="w-4 h-4 text-[var(--color-text-muted)] absolute left-3 top-1/2 -translate-y-1/2" />
-                        <input
-                          type="email"
-                          required
-                          value={formData.email}
-                          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                          placeholder="e.g. candidate@example.com"
-                          className="w-full pl-9 pr-3 py-2 rounded-xl bg-[var(--color-bg)] border border-[var(--color-border)] text-sm text-[var(--color-text-primary)] focus:outline-none focus:border-purple-500 transition-colors"
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold text-[var(--color-text-secondary)] mb-1">
-                        Mobile Number <span className="text-red-500">*</span>
-                      </label>
-                      <div className="relative">
-                        <Phone className="w-4 h-4 text-[var(--color-text-muted)] absolute left-3 top-1/2 -translate-y-1/2" />
-                        <input
-                          type="tel"
-                          required
-                          value={formData.phone}
-                          onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                          placeholder="e.g. +91 98765 43210"
-                          className="w-full pl-9 pr-3 py-2 rounded-xl bg-[var(--color-bg)] border border-[var(--color-border)] text-sm text-[var(--color-text-primary)] focus:outline-none focus:border-purple-500 transition-colors"
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold text-[var(--color-text-secondary)] mb-1">
-                        Address / City <span className="text-red-500">*</span>
-                      </label>
-                      <div className="relative">
-                        <MapPin className="w-4 h-4 text-[var(--color-text-muted)] absolute left-3 top-1/2 -translate-y-1/2" />
-                        <input
-                          type="text"
-                          required
-                          value={formData.address}
-                          onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                          placeholder="e.g. Mumbai, Maharashtra"
-                          className="w-full pl-9 pr-3 py-2 rounded-xl bg-[var(--color-bg)] border border-[var(--color-border)] text-sm text-[var(--color-text-primary)] focus:outline-none focus:border-purple-500 transition-colors"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Resume Submission */}
-                <div className="pt-2 border-t border-[var(--color-border)]">
-                  <h4 className="text-[11px] font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-2 flex items-center gap-1.5">
-                    <FileText className="w-3.5 h-3.5 text-purple-500" />
-                    Resume / Portfolio Link <span className="text-red-500">*</span>
-                  </h4>
+              {modalStep === 'success' ? (
+                /* ─── SUCCESS SCREEN: Never leaves the user wondering "nothing can show" ─── */
+                <div className="p-6 sm:p-8 text-center flex flex-col items-center justify-center space-y-5">
                   <div className="relative">
-                    <FileText className="w-4 h-4 text-[var(--color-text-muted)] absolute left-3 top-1/2 -translate-y-1/2" />
-                    <input
-                      type="text"
-                      required
-                      value={formData.resume}
-                      onChange={(e) => setFormData({ ...formData, resume: e.target.value })}
-                      placeholder="https://drive.google.com/... or uploaded resume link"
-                      className="w-full pl-9 pr-3 py-2 rounded-xl bg-[var(--color-bg)] border border-[var(--color-border)] text-sm text-[var(--color-text-primary)] focus:outline-none focus:border-purple-500 transition-colors"
-                    />
+                    <div className="w-20 h-20 rounded-full bg-green-500/15 border border-green-500/30 flex items-center justify-center text-green-500 shadow-xl shadow-green-500/15">
+                      <CheckCircle2 className="w-10 h-10" />
+                    </div>
+                    <div className="absolute -inset-2 bg-green-500/20 blur-xl rounded-full -z-10" />
                   </div>
-                  <p className="text-[10px] text-[var(--color-text-muted)] mt-1">
-                    Google Drive, Dropbox, Notion, or personal portfolio PDF link accessible to recruiters.
-                  </p>
-                </div>
 
-                {/* Cover Note */}
-                <div className="pt-2 border-t border-[var(--color-border)]">
-                  <div className="flex items-center justify-between mb-1.5">
-                    <label className="text-[11px] font-bold uppercase tracking-wider text-[var(--color-text-muted)] flex items-center gap-1.5">
-                      <MessageSquare className="w-3.5 h-3.5 text-purple-500" />
-                      Cover Note (Optional)
-                    </label>
-                    <span className="text-[10px] text-[var(--color-text-muted)]">Optional</span>
+                  <div>
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-green-500/10 text-green-500 border border-green-500/20 mb-2">
+                      <Sparkles className="w-3.5 h-3.5" />
+                      Submitted Successfully
+                    </span>
+                    <h3 className="text-2xl font-black text-[var(--color-text-primary)]">
+                      Application Received!
+                    </h3>
+                    <p className="text-xs text-[var(--color-text-secondary)] mt-1.5 max-w-md mx-auto">
+                      Your application for <span className="font-bold text-purple-500">{job.title}</span> has been securely delivered to <span className="font-bold text-[var(--color-text-primary)]">{job.company}</span>.
+                    </p>
                   </div>
-                  <textarea
-                    rows="2"
-                    value={formData.coverNote}
-                    onChange={(e) => setFormData({ ...formData, coverNote: e.target.value })}
-                    placeholder="Briefly describe your experience or why you'd be a great fit..."
-                    className="w-full px-3 py-2 rounded-xl bg-[var(--color-bg)] border border-[var(--color-border)] text-sm text-[var(--color-text-primary)] focus:outline-none focus:border-purple-500 transition-colors resize-none"
-                  />
+
+                  {/* Submission Summary Box */}
+                  <div className="w-full bg-[var(--color-bg)] border border-[var(--color-border)] rounded-2xl p-4 sm:p-5 text-left text-xs space-y-2.5 shadow-inner">
+                    <p className="text-[11px] font-bold uppercase tracking-wider text-[var(--color-text-muted)] border-b border-[var(--color-border)] pb-2 flex items-center justify-between">
+                      <span>Submitted Details</span>
+                      <span className="text-green-500 font-semibold lowercase">status: under review</span>
+                    </p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                      <div>
+                        <span className="text-[var(--color-text-muted)] block font-medium">Full Name:</span>
+                        <span className="font-bold text-[var(--color-text-primary)]">{formData.fullName || user?.name}</span>
+                      </div>
+                      <div>
+                        <span className="text-[var(--color-text-muted)] block font-medium">Contact Email:</span>
+                        <span className="font-bold text-[var(--color-text-primary)]">{formData.email || user?.email}</span>
+                      </div>
+                      <div>
+                        <span className="text-[var(--color-text-muted)] block font-medium">Mobile Number:</span>
+                        <span className="font-bold text-[var(--color-text-primary)]">{formData.phone || 'Provided'}</span>
+                      </div>
+                      <div>
+                        <span className="text-[var(--color-text-muted)] block font-medium">Address:</span>
+                        <span className="font-bold text-[var(--color-text-primary)]">{formData.address || 'Provided'}</span>
+                      </div>
+                    </div>
+                    {formData.resume && (
+                      <div className="pt-2 border-t border-[var(--color-border)] flex items-center justify-between gap-2">
+                        <span className="text-[var(--color-text-muted)] shrink-0">Resume:</span>
+                        <span className="font-mono text-[11px] text-blue-500 truncate max-w-xs">{formData.resume}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="w-full pt-2 flex flex-col sm:flex-row items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowApplyModal(false);
+                        navigate('/dashboard?tab=applied');
+                      }}
+                      className="w-full sm:flex-1 py-3 px-5 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-extrabold text-xs shadow-lg shadow-purple-500/25 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                    >
+                      <Briefcase className="w-4 h-4" />
+                      View in Applied Jobs (Dashboard)
+                      <ArrowRight className="w-4 h-4" />
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setShowApplyModal(false)}
+                      className="w-full sm:w-auto py-3 px-6 rounded-2xl border border-[var(--color-border)] text-xs font-bold text-[var(--color-text-secondary)] hover:bg-[var(--color-bg)] transition-colors cursor-pointer"
+                    >
+                      Done
+                    </button>
+                  </div>
                 </div>
-              </div>
+              ) : (
+                /* ─── FORM STEP: With fixed header, scrollable body, and fixed footer ─── */
+                <form onSubmit={handleApply} className="flex flex-col flex-1 overflow-hidden">
+                  {/* Fixed Modal Header - Always in view */}
+                  <div className="p-5 sm:p-6 pb-4 border-b border-[var(--color-border)] flex items-start justify-between gap-4 shrink-0 bg-[var(--color-surface)]">
+                    <div>
+                      <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-purple-500/10 text-purple-500 mb-1.5">
+                        <Sparkles className="w-3 h-3" />
+                        Direct Application
+                      </div>
+                      <h3 className="text-xl sm:text-2xl font-extrabold text-[var(--color-text-primary)] leading-tight">
+                        Apply to {job.company}
+                      </h3>
+                      <p className="text-xs text-[var(--color-text-secondary)] mt-0.5">
+                        Role: <span className="font-bold text-purple-500">{job.title}</span> • {job.location || 'Remote'}
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowApplyModal(false);
+                        setApplyError('');
+                      }}
+                      className="p-2 rounded-xl text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:bg-white/10 transition-colors cursor-pointer shrink-0"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
 
-              {/* Fixed Modal Footer - Always in view */}
-              <div className="p-4 sm:p-5 border-t border-[var(--color-border)] flex items-center justify-between gap-3 shrink-0 bg-[var(--color-surface)]">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowApplyModal(false);
-                    setApplyError('');
-                  }}
-                  className="px-4 py-2 rounded-xl border border-[var(--color-border)] text-xs font-bold text-[var(--color-text-secondary)] hover:bg-[var(--color-bg)] transition-colors cursor-pointer"
-                >
-                  Cancel
-                </button>
+                  {/* Scrollable Form Body - ALWAYS resets to top on open */}
+                  <div
+                    ref={modalScrollRef}
+                    className="p-5 sm:p-6 overflow-y-auto flex-1 space-y-4"
+                  >
+                    {applyError && (
+                      <div className="p-3.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-xs font-semibold flex items-center gap-2">
+                        <AlertCircle className="w-4 h-4 shrink-0" />
+                        <span>{applyError}</span>
+                      </div>
+                    )}
 
-                <button
-                  type="button"
-                  onClick={handleApply}
-                  disabled={applying}
-                  className="px-6 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-white text-xs font-bold shadow-lg shadow-purple-500/25 transition-all flex items-center gap-2 cursor-pointer"
-                >
-                  {applying ? (
-                    <>
-                      <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      Submitting...
-                    </>
-                  ) : (
-                    <>
-                      <Send className="w-3.5 h-3.5" />
-                      Confirm & Submit Application
-                    </>
-                  )}
-                </button>
-              </div>
+                    {/* Candidate Personal Details */}
+                    <div>
+                      <h4 className="text-[11px] font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-2.5 flex items-center gap-1.5">
+                        <User className="w-3.5 h-3.5 text-purple-500" />
+                        Applicant Contact Details
+                      </h4>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                        <div>
+                          <label className="block text-xs font-bold text-[var(--color-text-secondary)] mb-1">
+                            Full Name <span className="text-red-500">*</span>
+                          </label>
+                          <div className="relative">
+                            <User className="w-4 h-4 text-[var(--color-text-muted)] absolute left-3 top-1/2 -translate-y-1/2" />
+                            <input
+                              type="text"
+                              required
+                              value={formData.fullName}
+                              onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                              placeholder="e.g. John Doe"
+                              className="w-full pl-9 pr-3 py-2 rounded-xl bg-[var(--color-bg)] border border-[var(--color-border)] text-sm text-[var(--color-text-primary)] focus:outline-none focus:border-purple-500 transition-colors"
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-bold text-[var(--color-text-secondary)] mb-1">
+                            Email Address <span className="text-red-500">*</span>
+                          </label>
+                          <div className="relative">
+                            <Mail className="w-4 h-4 text-[var(--color-text-muted)] absolute left-3 top-1/2 -translate-y-1/2" />
+                            <input
+                              type="email"
+                              required
+                              value={formData.email}
+                              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                              placeholder="e.g. candidate@example.com"
+                              className="w-full pl-9 pr-3 py-2 rounded-xl bg-[var(--color-bg)] border border-[var(--color-border)] text-sm text-[var(--color-text-primary)] focus:outline-none focus:border-purple-500 transition-colors"
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-bold text-[var(--color-text-secondary)] mb-1">
+                            Mobile Number <span className="text-red-500">*</span>
+                          </label>
+                          <div className="relative">
+                            <Phone className="w-4 h-4 text-[var(--color-text-muted)] absolute left-3 top-1/2 -translate-y-1/2" />
+                            <input
+                              type="tel"
+                              required
+                              value={formData.phone}
+                              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                              placeholder="e.g. +91 98765 43210"
+                              className="w-full pl-9 pr-3 py-2 rounded-xl bg-[var(--color-bg)] border border-[var(--color-border)] text-sm text-[var(--color-text-primary)] focus:outline-none focus:border-purple-500 transition-colors"
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-bold text-[var(--color-text-secondary)] mb-1">
+                            Address / City <span className="text-red-500">*</span>
+                          </label>
+                          <div className="relative">
+                            <MapPin className="w-4 h-4 text-[var(--color-text-muted)] absolute left-3 top-1/2 -translate-y-1/2" />
+                            <input
+                              type="text"
+                              required
+                              value={formData.address}
+                              onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                              placeholder="e.g. Mumbai, Maharashtra"
+                              className="w-full pl-9 pr-3 py-2 rounded-xl bg-[var(--color-bg)] border border-[var(--color-border)] text-sm text-[var(--color-text-primary)] focus:outline-none focus:border-purple-500 transition-colors"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Resume Submission */}
+                    <div className="pt-2 border-t border-[var(--color-border)]">
+                      <h4 className="text-[11px] font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-2 flex items-center gap-1.5">
+                        <FileText className="w-3.5 h-3.5 text-purple-500" />
+                        Resume / Portfolio Link <span className="text-red-500">*</span>
+                      </h4>
+                      <div className="relative">
+                        <FileText className="w-4 h-4 text-[var(--color-text-muted)] absolute left-3 top-1/2 -translate-y-1/2" />
+                        <input
+                          type="text"
+                          required
+                          value={formData.resume}
+                          onChange={(e) => setFormData({ ...formData, resume: e.target.value })}
+                          placeholder="https://drive.google.com/... or uploaded resume link"
+                          className="w-full pl-9 pr-3 py-2 rounded-xl bg-[var(--color-bg)] border border-[var(--color-border)] text-sm text-[var(--color-text-primary)] focus:outline-none focus:border-purple-500 transition-colors"
+                        />
+                      </div>
+                      <p className="text-[10px] text-[var(--color-text-muted)] mt-1">
+                        Google Drive, Dropbox, Notion, or personal portfolio PDF link accessible to recruiters.
+                      </p>
+                    </div>
+
+                    {/* Cover Note */}
+                    <div className="pt-2 border-t border-[var(--color-border)]">
+                      <div className="flex items-center justify-between mb-1.5">
+                        <label className="text-[11px] font-bold uppercase tracking-wider text-[var(--color-text-muted)] flex items-center gap-1.5">
+                          <MessageSquare className="w-3.5 h-3.5 text-purple-500" />
+                          Cover Note (Optional)
+                        </label>
+                        <span className="text-[10px] text-[var(--color-text-muted)]">Optional</span>
+                      </div>
+                      <textarea
+                        rows="2"
+                        value={formData.coverNote}
+                        onChange={(e) => setFormData({ ...formData, coverNote: e.target.value })}
+                        placeholder="Briefly describe your experience or why you'd be a great fit..."
+                        className="w-full px-3 py-2 rounded-xl bg-[var(--color-bg)] border border-[var(--color-border)] text-sm text-[var(--color-text-primary)] focus:outline-none focus:border-purple-500 transition-colors resize-none"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Fixed Modal Footer - Always in view */}
+                  <div className="p-4 sm:p-5 border-t border-[var(--color-border)] flex items-center justify-between gap-3 shrink-0 bg-[var(--color-surface)]">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowApplyModal(false);
+                        setApplyError('');
+                      }}
+                      className="px-4 py-2 rounded-xl border border-[var(--color-border)] text-xs font-bold text-[var(--color-text-secondary)] hover:bg-[var(--color-bg)] transition-colors cursor-pointer"
+                    >
+                      Cancel
+                    </button>
+
+                    <button
+                      type="submit"
+                      disabled={applying}
+                      className="px-6 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-white text-xs font-bold shadow-lg shadow-purple-500/25 transition-all flex items-center gap-2 cursor-pointer"
+                    >
+                      {applying ? (
+                        <>
+                          <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          Submitting...
+                        </>
+                      ) : (
+                        <>
+                          <Send className="w-3.5 h-3.5" />
+                          Confirm & Submit Application
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </form>
+              )}
             </motion.div>
           </div>
         )}
@@ -832,8 +936,8 @@ const JobDetails = () => {
           </div>
         ) : (
           <button
-            onClick={() => setShowApplyModal(true)}
-            className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-extrabold text-xs shadow-md flex items-center gap-1.5 shrink-0"
+            onClick={openApplyModal}
+            className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-extrabold text-xs shadow-md flex items-center gap-1.5 shrink-0 cursor-pointer"
           >
             <Send className="w-3.5 h-3.5" />
             Apply Now
