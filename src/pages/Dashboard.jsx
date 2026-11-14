@@ -60,6 +60,7 @@ const Dashboard = () => {
         Date.now().toString()
       );
       window.dispatchEvent(new Event('messages_read'));
+      setMessages((prev) => prev.map((m) => ({ ...m, read: true })));
     }
   }, [activeTab, user]);
 
@@ -232,7 +233,44 @@ const Dashboard = () => {
       });
     }
 
-    setMessages(msgs);
+    const dismissedKey = `dismissed_message_ids_${user?._id || user?.email}`;
+    const dismissedIds = JSON.parse(localStorage.getItem(dismissedKey) || '[]');
+    const visibleMsgs = msgs.filter((m) => !dismissedIds.includes(m.id));
+    setMessages(visibleMsgs);
+  };
+
+  // Dismiss/remove a specific message after reading
+  const handleDismissMessage = (msgId) => {
+    try {
+      const key = `dismissed_message_ids_${user?._id || user?.email}`;
+      const dismissed = JSON.parse(localStorage.getItem(key) || '[]');
+      if (!dismissed.includes(msgId)) {
+        dismissed.push(msgId);
+        localStorage.setItem(key, JSON.stringify(dismissed));
+      }
+      setMessages((prev) => prev.filter((m) => m.id !== msgId));
+      window.dispatchEvent(new Event('messages_read'));
+    } catch (err) {
+      console.error('Failed to dismiss message:', err);
+    }
+  };
+
+  // Clear all messages
+  const handleClearAllMessages = () => {
+    try {
+      const key = `dismissed_message_ids_${user?._id || user?.email}`;
+      const dismissed = JSON.parse(localStorage.getItem(key) || '[]');
+      messages.forEach((m) => {
+        if (!dismissed.includes(m.id)) {
+          dismissed.push(m.id);
+        }
+      });
+      localStorage.setItem(key, JSON.stringify(dismissed));
+      setMessages([]);
+      window.dispatchEvent(new Event('messages_read'));
+    } catch (err) {
+      console.error('Failed to clear messages:', err);
+    }
   };
 
   // Remove saved job
@@ -797,9 +835,20 @@ const Dashboard = () => {
                     Updates from recruiters, hiring managers, and system alerts
                   </p>
                 </div>
-                <span className="text-xs font-semibold px-3 py-1 rounded-xl bg-purple-500/10 text-purple-500">
-                  {messages.length} messages
-                </span>
+                <div className="flex items-center gap-3">
+                  {messages.length > 0 && (
+                    <button
+                      onClick={handleClearAllMessages}
+                      className="text-xs font-semibold px-3 py-1.5 rounded-xl border border-[var(--color-border)] hover:border-red-500/40 text-[var(--color-text-muted)] hover:text-red-500 hover:bg-red-500/10 transition-all flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      Clear All
+                    </button>
+                  )}
+                  <span className="text-xs font-semibold px-3 py-1 rounded-xl bg-purple-500/10 text-purple-500">
+                    {messages.length} messages
+                  </span>
+                </div>
               </div>
 
               {messages.length === 0 ? (
@@ -808,11 +857,10 @@ const Dashboard = () => {
                     <MessageSquare className="w-8 h-8" />
                   </div>
                   <h4 className="text-xl font-bold text-[var(--color-text-primary)]">
-                    No messages right now
+                    All caught up!
                   </h4>
                   <p className="text-sm text-[var(--color-text-secondary)] max-w-md mx-auto">
-                    When recruiters review your applications or schedule interviews, updates
-                    will appear right here.
+                    No new messages right now. Waiting for new updates from recruiters, applications, or status changes.
                   </p>
                 </div>
               ) : (
@@ -861,8 +909,8 @@ const Dashboard = () => {
                           </div>
                         </div>
 
-                        {msg.jobId && (
-                          <div className="shrink-0 self-end md:self-center">
+                        <div className="flex items-center gap-2 shrink-0 self-end md:self-center">
+                          {msg.jobId && (
                             <Link
                               to={`/jobs/${msg.jobId}`}
                               className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-purple-600/10 hover:bg-purple-600 text-purple-500 hover:text-white font-bold text-xs transition-all"
@@ -870,8 +918,15 @@ const Dashboard = () => {
                               View Job
                               <ArrowRight className="w-3.5 h-3.5" />
                             </Link>
-                          </div>
-                        )}
+                          )}
+                          <button
+                            onClick={() => handleDismissMessage(msg.id)}
+                            title="Remove message"
+                            className="p-2 rounded-xl border border-[var(--color-border)] hover:border-red-500/40 text-[var(--color-text-muted)] hover:text-red-500 hover:bg-red-500/10 transition-all cursor-pointer"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
                       </div>
                     );
                   })}

@@ -130,11 +130,17 @@ const Navbar = () => {
           localStorage.getItem(`messages_last_read_${user._id || user.email}`) || '0',
           10
         );
+        const dismissedKey = `dismissed_message_ids_${user._id || user.email}`;
+        const dismissedIds = JSON.parse(
+          localStorage.getItem(dismissedKey) || '[]'
+        );
 
         let unread = 0;
         if (user.role === 'recruiter') {
           // For recruiters: count applications submitted to their jobs after lastRead
-          apps.forEach((app) => {
+          apps.forEach((app, idx) => {
+            const msgId = `recruiter-app-${app._id || idx}`;
+            if (dismissedIds.includes(msgId)) return;
             const time = new Date(app.createdAt || 0).getTime();
             if (lastRead > 0 && time > lastRead) {
               unread++;
@@ -142,8 +148,10 @@ const Navbar = () => {
           });
         } else {
           // For candidates: count shortlisted status updates after lastRead
-          apps.forEach((app) => {
+          apps.forEach((app, idx) => {
             if (app.status === 'shortlisted') {
+              const msgId = `app-shortlisted-${app._id || idx}`;
+              if (dismissedIds.includes(msgId)) return;
               const time = new Date(app.updatedAt || app.createdAt || 0).getTime();
               const isRecent = Date.now() - time < 7 * 24 * 60 * 60 * 1000;
               if (isRecent && (lastRead === 0 || time > lastRead)) {
@@ -188,6 +196,15 @@ const Navbar = () => {
       to: '/dashboard?tab=messages',
       icon: MessageSquare,
       badge: unreadCount > 0 ? `${unreadCount}` : null,
+      onClick: () => {
+        setUnreadCount(0);
+        if (user) {
+          localStorage.setItem(
+            `messages_last_read_${user._id || user.email}`,
+            Date.now().toString()
+          );
+        }
+      },
     },
   ];
 
@@ -219,7 +236,7 @@ const Navbar = () => {
           {/* Desktop Nav: Shows Applied Jobs & Messages ONLY WHEN LOGGED IN */}
           <div className="hidden lg:flex items-center gap-1">
             {user
-              ? loggedInNavLinks.map(({ label, to, badge }) => {
+              ? loggedInNavLinks.map(({ label, to, badge, onClick }) => {
                   const isActive =
                     to === '/'
                       ? location.pathname === '/'
@@ -231,6 +248,7 @@ const Navbar = () => {
                     <Link
                       key={label}
                       to={to}
+                      onClick={onClick}
                       className={`px-3.5 py-2 text-sm font-medium rounded-xl transition-all relative group flex items-center gap-1.5 ${
                         isActive
                           ? 'text-purple-500 font-bold bg-purple-500/10'
@@ -274,6 +292,15 @@ const Navbar = () => {
                 {/* Direct Messages Quick Link Button */}
                 <Link
                   to="/dashboard?tab=messages"
+                  onClick={() => {
+                    setUnreadCount(0);
+                    if (user) {
+                      localStorage.setItem(
+                        `messages_last_read_${user._id || user.email}`,
+                        Date.now().toString()
+                      );
+                    }
+                  }}
                   title="View Messages & Notifications"
                   className="p-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-secondary)] hover:text-purple-500 hover:border-purple-500/50 transition-colors relative"
                 >
@@ -353,6 +380,16 @@ const Navbar = () => {
 
                           <Link
                             to="/dashboard?tab=messages"
+                            onClick={() => {
+                              setIsUserDropdownOpen(false);
+                              setUnreadCount(0);
+                              if (user) {
+                                localStorage.setItem(
+                                  `messages_last_read_${user._id || user.email}`,
+                                  Date.now().toString()
+                                );
+                              }
+                            }}
                             className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-purple-500/10 text-xs font-semibold text-[var(--color-text-primary)] hover:text-purple-500 transition-colors"
                           >
                             <MessageSquare className="w-4 h-4 text-pink-500" />
@@ -488,11 +525,14 @@ const Navbar = () => {
                     </span>
                   </div>
 
-                  {loggedInNavLinks.map(({ label, to, icon: Icon }) => (
+                  {loggedInNavLinks.map(({ label, to, icon: Icon, onClick }) => (
                     <Link
                       key={label}
                       to={to}
-                      onClick={() => setIsMobileMenuOpen(false)}
+                      onClick={() => {
+                        setIsMobileMenuOpen(false);
+                        if (onClick) onClick();
+                      }}
                       className="flex items-center gap-4 text-[var(--color-text-primary)] hover:text-purple-500 text-base font-semibold py-2 px-3 rounded-xl hover:bg-purple-500/5 transition-colors"
                     >
                       <Icon className="w-5 h-5 text-purple-500" /> {label}
