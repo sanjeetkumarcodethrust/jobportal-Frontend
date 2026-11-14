@@ -52,6 +52,17 @@ const Dashboard = () => {
     setSearchParams({ tab: newTab });
   };
 
+  // Clear unread notification status when viewing messages tab
+  useEffect(() => {
+    if (activeTab === 'messages' && user) {
+      localStorage.setItem(
+        `messages_last_read_${user._id || user.email}`,
+        Date.now().toString()
+      );
+      window.dispatchEvent(new Event('messages_read'));
+    }
+  }, [activeTab, user]);
+
   const [applications, setApplications] = useState([]);
   const [loadingApps, setLoadingApps] = useState(true);
   const [savedJobs, setSavedJobs] = useState([]);
@@ -115,6 +126,10 @@ const Dashboard = () => {
   // Construct real notification messages based on user activity
   const buildMessages = (apps) => {
     const msgs = [];
+    const lastRead = parseInt(
+      localStorage.getItem(`messages_last_read_${user?._id || user?.email}`) || '0',
+      10
+    );
 
     // 1. Welcome Message
     msgs.push({
@@ -131,60 +146,91 @@ const Dashboard = () => {
       read: true,
     });
 
-    // 2. Messages for each application
-    apps.forEach((app, idx) => {
-      const job = app.jobId || {};
-      const jobTitle = job.title || 'Position';
-      const company = job.company || 'Company';
-      const status = app.status || 'applied';
-      const dateStr = app.createdAt
-        ? new Date(app.createdAt).toLocaleDateString()
-        : 'Recently';
+    if (user?.role === 'recruiter') {
+      // Recruiter: incoming candidate applications
+      apps.forEach((app, idx) => {
+        const job = app.jobId || {};
+        const jobTitle = job.title || 'Position';
+        const candidateName = app.fullName || app.applicantId?.name || 'A candidate';
+        const dateStr = app.createdAt
+          ? new Date(app.createdAt).toLocaleDateString()
+          : 'Recently';
+        const appTime = new Date(app.createdAt || 0).getTime();
+        const isUnread = lastRead > 0 && appTime > lastRead;
 
-      if (status === 'shortlisted') {
         msgs.push({
-          id: `app-shortlisted-${app._id || idx}`,
-          type: 'status',
-          title: `Congratulations! Shortlisted for ${jobTitle}`,
-          sender: company,
+          id: `recruiter-app-${app._id || idx}`,
+          type: 'applicant',
+          title: `New Applicant: ${candidateName}`,
+          sender: `${candidateName} • ${jobTitle}`,
           time: dateStr,
-          content: `Great news! Your application for "${jobTitle}" at ${company} was reviewed and shortlisted. The hiring team may reach out to schedule an interview soon.`,
-          icon: CheckCircle,
-          iconColor: 'text-green-500',
-          bgColor: 'bg-green-500/10',
+          content: `${candidateName} has submitted an application for the "${jobTitle}" position. Contact: ${app.email || 'N/A'}${app.phone ? ' | ' + app.phone : ''}. Review their resume and details in the Candidates tab.`,
+          icon: Users,
+          iconColor: 'text-purple-500',
+          bgColor: 'bg-purple-500/10',
           jobId: job._id,
-          read: false,
+          read: !isUnread,
         });
-      } else if (status === 'rejected') {
-        msgs.push({
-          id: `app-rejected-${app._id || idx}`,
-          type: 'status',
-          title: `Application Update: ${jobTitle}`,
-          sender: company,
-          time: dateStr,
-          content: `Thank you for your interest in the "${jobTitle}" position at ${company}. The hiring team has decided to proceed with other candidates at this time.`,
-          icon: XCircle,
-          iconColor: 'text-red-500',
-          bgColor: 'bg-red-500/10',
-          jobId: job._id,
-          read: true,
-        });
-      } else {
-        msgs.push({
-          id: `app-applied-${app._id || idx}`,
-          type: 'status',
-          title: `Application Confirmed: ${jobTitle}`,
-          sender: company,
-          time: dateStr,
-          content: `Your application and resume for "${jobTitle}" at ${company} were successfully delivered to the hiring manager.`,
-          icon: Briefcase,
-          iconColor: 'text-blue-500',
-          bgColor: 'bg-blue-500/10',
-          jobId: job._id,
-          read: true,
-        });
-      }
-    });
+      });
+    } else {
+      // Candidate: application updates
+      apps.forEach((app, idx) => {
+        const job = app.jobId || {};
+        const jobTitle = job.title || 'Position';
+        const company = job.company || 'Company';
+        const status = app.status || 'applied';
+        const dateStr = app.createdAt
+          ? new Date(app.createdAt).toLocaleDateString()
+          : 'Recently';
+
+        if (status === 'shortlisted') {
+          const updateTime = new Date(app.updatedAt || app.createdAt || 0).getTime();
+          const isUnread = lastRead > 0 && updateTime > lastRead;
+
+          msgs.push({
+            id: `app-shortlisted-${app._id || idx}`,
+            type: 'status',
+            title: `Congratulations! Shortlisted for ${jobTitle}`,
+            sender: company,
+            time: dateStr,
+            content: `Great news! Your application for "${jobTitle}" at ${company} was reviewed and shortlisted. The hiring team may reach out to schedule an interview soon.`,
+            icon: CheckCircle,
+            iconColor: 'text-green-500',
+            bgColor: 'bg-green-500/10',
+            jobId: job._id,
+            read: !isUnread,
+          });
+        } else if (status === 'rejected') {
+          msgs.push({
+            id: `app-rejected-${app._id || idx}`,
+            type: 'status',
+            title: `Application Update: ${jobTitle}`,
+            sender: company,
+            time: dateStr,
+            content: `Thank you for your interest in the "${jobTitle}" position at ${company}. The hiring team has decided to proceed with other candidates at this time.`,
+            icon: XCircle,
+            iconColor: 'text-red-500',
+            bgColor: 'bg-red-500/10',
+            jobId: job._id,
+            read: true,
+          });
+        } else {
+          msgs.push({
+            id: `app-applied-${app._id || idx}`,
+            type: 'status',
+            title: `Application Confirmed: ${jobTitle}`,
+            sender: company,
+            time: dateStr,
+            content: `Your application and resume for "${jobTitle}" at ${company} were successfully delivered to the hiring manager.`,
+            icon: Briefcase,
+            iconColor: 'text-blue-500',
+            bgColor: 'bg-blue-500/10',
+            jobId: job._id,
+            read: true,
+          });
+        }
+      });
+    }
 
     setMessages(msgs);
   };
@@ -794,6 +840,11 @@ const Dashboard = () => {
                               <h4 className="text-base font-bold text-[var(--color-text-primary)]">
                                 {msg.title}
                               </h4>
+                              {!msg.read && (
+                                <span className="px-2 py-0.5 text-[10px] font-bold rounded-full bg-purple-500/20 text-purple-400 border border-purple-500/30 uppercase tracking-wider">
+                                  New
+                                </span>
+                              )}
                               <span className="text-[11px] font-semibold text-purple-400">
                                 • {msg.sender}
                               </span>

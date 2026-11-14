@@ -1,6 +1,7 @@
 import { useContext, useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
+import api from '../services/api';
 import {
   Menu,
   X,
@@ -99,6 +100,76 @@ const Navbar = () => {
     navigate('/');
   };
 
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  // Check for genuine unread messages
+  useEffect(() => {
+    if (!user) {
+      setUnreadCount(0);
+      return;
+    }
+
+    // If currently on messages tab, mark as read immediately
+    if (
+      location.pathname === '/dashboard' &&
+      location.search.includes('tab=messages')
+    ) {
+      setUnreadCount(0);
+      localStorage.setItem(
+        `messages_last_read_${user._id || user.email}`,
+        Date.now().toString()
+      );
+      return;
+    }
+
+    const fetchUnreadCount = async () => {
+      try {
+        const res = await api.get('/applications/my');
+        const apps = Array.isArray(res.data) ? res.data : [];
+        const lastRead = parseInt(
+          localStorage.getItem(`messages_last_read_${user._id || user.email}`) || '0',
+          10
+        );
+
+        let unread = 0;
+        if (user.role === 'recruiter') {
+          // For recruiters: count applications submitted to their jobs after lastRead
+          apps.forEach((app) => {
+            const time = new Date(app.createdAt || 0).getTime();
+            if (lastRead > 0 && time > lastRead) {
+              unread++;
+            }
+          });
+        } else {
+          // For candidates: count shortlisted status updates after lastRead
+          apps.forEach((app) => {
+            if (app.status === 'shortlisted') {
+              const time = new Date(app.updatedAt || app.createdAt || 0).getTime();
+              const isRecent = Date.now() - time < 7 * 24 * 60 * 60 * 1000;
+              if (isRecent && (lastRead === 0 || time > lastRead)) {
+                unread++;
+              }
+            }
+          });
+        }
+
+        setUnreadCount(unread);
+      } catch {
+        setUnreadCount(0);
+      }
+    };
+
+    fetchUnreadCount();
+
+    const handleMessagesRead = () => {
+      setUnreadCount(0);
+    };
+    window.addEventListener('messages_read', handleMessagesRead);
+    return () => {
+      window.removeEventListener('messages_read', handleMessagesRead);
+    };
+  }, [user, location.pathname, location.search]);
+
   const isRecruiter = user?.role === 'recruiter';
 
   // Navigation links for logged-in users (shows Applied Jobs & Messages only when logged in)
@@ -116,6 +187,7 @@ const Navbar = () => {
       label: 'Messages',
       to: '/dashboard?tab=messages',
       icon: MessageSquare,
+      badge: unreadCount > 0 ? `${unreadCount}` : null,
     },
   ];
 
@@ -206,7 +278,9 @@ const Navbar = () => {
                   className="p-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-secondary)] hover:text-purple-500 hover:border-purple-500/50 transition-colors relative"
                 >
                   <MessageSquare className="w-4 h-4" />
-                  <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-purple-500 rounded-full animate-pulse"></span>
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-purple-500 rounded-full animate-pulse"></span>
+                  )}
                 </Link>
 
                 {/* User Menu Dropdown */}
